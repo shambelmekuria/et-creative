@@ -1,0 +1,63 @@
+POST http://127.0.0.1:8000/api/token/verify/ HTTP/1.1
+Content-Type: application/json
+
+{
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzY1Mzc2NTc3LCJpYXQiOjE3NjUzNzYyNzcsImp0aSI6ImYxZWRiYmFhNWU3ODQyZjJhMGYxNmYyMGQ3OTYyYmYyIiwidXNlcl9pZCI6IjEiLCJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6ImFkbWluIiwiZnVsbF9uYW1lIjoiU2hhbWJlbCBNZWt1cmlhIn0.sX6g2ZCfbdxHrNkPlxKYMISolfQVlABvQioBD_T_O10"
+}
+
+###
+POST http://127.0.0.1:8000/api/users/create/
+Content-Type: application/json
+
+{
+  "username": "shamdev",
+  "email": "shambelmekuriya2023@gmail.com",
+  "password": "test",
+  "first_name": "shambel",
+  "last_name": "mekuria",
+  "role": "admin"
+}
+
+###
+POST http://127.0.0.1:8000/api/token/ HTTP/1.1
+Content-Type: application/json
+
+{
+    "username": "test",
+    "password": "1"
+}
+
+###
+GET http://127.0.0.1:8000/api/users/me HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzY2MTQ3OTE0LCJpYXQiOjE3NjYxNDc2MTQsImp0aSI6IjJiYzI4YmM1NTgyYzRlNTJiYjViMTlhOTMxODZmNjdkIiwidXNlcl9pZCI6IjEifQ.eZZ4k0udlBXLr6r3dey68ZrFXBTn2Fu-_aLHawa3Iu4
+
+###
+DELETE http://127.0.0.1:8000/api/users/delete/
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzY1NjM3MjcwLCJpYXQiOjE3NjU2MzcyMTAsImp0aSI6IjNmZjUyZjlhZjQwZTRlZjc4YmZkMWM2YzgwMjgzNDkyIiwidXNlcl9pZCI6IjExIiwidXNlcm5hbWUiOiJqb2huZG9lIiwicm9sZSI6ImFkbWluIiwiZnVsbG5hbWUiOiJKb2huIERvZSJ9.V-ZnD-bM1LifS9P9DNlGMFkZYWFT8fiSy1WsqB--2f0
+
+###
+POST http://127.0.0.1:8000/api/users/test-password-change/
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzY1ODA2Njk2LCJpYXQiOjE3NjU4MDYzOTYsImp0aSI6ImI4YWYzOTA0ODQ1ZjQ5MWQ4MGZiNGU1OTc2MWJiNzNhIiwidXNlcl9pZCI6IjEyIiwidXNlcm5hbWUiOiJqb2huZG9lIiwicm9sZSI6ImFkbWluIiwiZnVsbG5hbWUiOiJKb2huIERvZSJ9.uqv1X0cY0a8mhL3Jq0JKlNO2wp7sQ3k2BHUOHRYFj3g
+content-Type: application/json
+
+{
+    "current_password": "123",
+    "new_password": "123"
+}
+
+###
+POST http://127.0.0.1:8000/api/users/password-reset/
+Content-Type: application/json
+
+{
+  "email": "shambelmekuriya2023@gmail.comhhh"
+}
+###
+POST http://127.0.0.1:8000/api/users/confirm-password-reset/
+Content-Type: application/json
+
+{
+  "token": "d138d5-dc28ee8d8b0bd0baf74ba43dc8c6aaa5",
+  "uid":"NQ",
+  "new_password":"1@9b9c3#"
+}

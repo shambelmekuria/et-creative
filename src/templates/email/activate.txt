@@ -1,0 +1,18 @@
+Hello {{ user_name }},
+
+Welcome! 👋
+Thank you for creating an account with us.
+
+To activate your account and verify your email address, please click the link below:
+
+{{ activation_link }}
+
+This link will expire in {{ expiry_time }}.
+
+If you did not create this account, you can safely ignore this email—no action is required.
+
+If you’re having trouble clicking the link, please copy and paste it into your browser.
+
+Thank you,
+{{domain}}
+Support Team
