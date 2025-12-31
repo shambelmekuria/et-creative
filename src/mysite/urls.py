@@ -9,4 +9,6 @@ urlpatterns = [
     path("api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
     path('api/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
     path("api/users/", include("users.urls")),
+        # Products, location, categories endpoints are in core app
+    path("api/", include("core.urls"))
 ]

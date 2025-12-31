@@ -23,7 +23,7 @@ POST http://127.0.0.1:8000/api/token/ HTTP/1.1
 Content-Type: application/json
 
 {
-    "username": "test",
+    "username": "admin",
     "password": "1"
 }
 
@@ -60,4 +60,24 @@ Content-Type: application/json
   "token": "d138d5-dc28ee8d8b0bd0baf74ba43dc8c6aaa5",
   "uid":"NQ",
   "new_password":"1@9b9c3#"
+}
+
+###
+
+POST http://127.0.0.1:8000/api/users/confirm-password-reset/
+Content-Type: application/json
+
+{
+  "token": "d138d5-dc28ee8d8b0bd0baf74ba43dc8c6aaa5",
+  "uid":"NQ",
+  "new_password":"1@9b9c3#"
+}
+
+### 
+PUT    http://127.0.0.1:8000/api/locations/2/
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzY3MDE2MDg5LCJpYXQiOjE3NjcwMTI0ODksImp0aSI6IjE3NDJjOTIwMjUwNDQxY2JhNGIxNmYwNTcxYjhjYjAzIiwidXNlcl9pZCI6IjEiLCJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6ImFkbWluIiwiZnVsbG5hbWUiOiJTaGFtYmVsIE1la3VyaWEifQ.kw0W_bN0BBAZ3qq4eI12fLM2acP-HzTABDJNEFbP3Fo
+Content-Type: application/json
+
+{
+  "name": "Dessie"
 }

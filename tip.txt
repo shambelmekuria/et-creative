@@ -1,0 +1,5 @@
+    #-------------------------------------------------------------------
+    # Perform create is used for Need extra logic or dynamic assignment  |
+    #-------------------------------------------------------------------
+         def perform_create(self, serializer):
+            serializer.save(owner=self.request.user)

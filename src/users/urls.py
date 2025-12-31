@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path,include
 from .views import *
 
 urlpatterns = [
@@ -10,5 +10,5 @@ urlpatterns = [
     path("password-reset/", password_reset_request, name="password-reset"),
     path("password-reset-confirm/", password_reset_confirm,
          name="confirm-password-reset/",),
-    path('activate/', activate_account, name="activate-account")
+    path('activate/', activate_account, name="activate-account"),
 ]
