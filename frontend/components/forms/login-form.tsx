@@ -25,6 +25,7 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 import { GalleryVerticalEnd } from "lucide-react";
 import Link from "next/link";
+import { Spinner } from "../ui/spinner";
 
 export function LoginForm({
   className,
@@ -46,7 +47,6 @@ export function LoginForm({
       setLogging(true);
       setError("");
       const response = await axios.post("api/auth/login", data);
-      localStorage.setItem("fullname", response.data.fullname);
       router.replace(`${response.data.role}/dashboard`);
     } catch {
       setLogging(false);
@@ -129,7 +129,7 @@ export function LoginForm({
               {error && <p className="p-2 bg-red-100 text-red-600">{error}</p>}
               <Field>
                 <Button type="submit" className="h-10">
-                  {logging ? "Logging in..." : "Login"}
+                  {logging ? <><Spinner /> Logging in…</> : "Login"} 
                 </Button>
               </Field>
             </FieldGroup>

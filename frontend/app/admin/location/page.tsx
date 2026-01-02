@@ -1,28 +1,29 @@
-import axios from "axios";
 import { columns, Payment } from "./columns"
 import { DataTable } from "./data-table"
-import Test from "./test";
+import { fetchLocation } from "@/actions/location";
+import { getToken } from "@/actions/token";
+import useSWR from "swr";
 
-async function getData(): Promise<Payment[]> {
-  // Fetch data from your API here.
-  return  [
-  { id: "728ed52f", amount: 100, status: "pending",   email: "m1@example.com" },
-  { id: "91ab3c20", amount: 250, status: "success",   email: "m2@example.com" },
-  { id: "bc72fa11", amount: 75,  status: "failed",    email: "m3@example.com" },
-  { id: "a18d9e44", amount: 300, status: "pending",   email: "m4@example.com" },
-  { id: "f03b2d99", amount: 180, status: "success",   email: "m5@example.com" },
+const fetcher = async (url: string) => {
+  const token = await getToken(); 
+  const res = await fetch(url, {
+    headers: {
+      "Authorization": `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  });
 
-];
+  if (!res.ok) throw new Error("Failed to fetch");
+  return res.json();
+};
 
-}
-
-export default async function DemoPage() {
-  const data = await getData()
-  
+export default async function Page() {
+  const data = await fetchLocation()
+  // const { data, error } = useSWR("/api/locations/", fetcher);
+  // console.log("data")
 
   return (
     <div className="container mx-auto py-10">
-      <Test/>
       <DataTable columns={columns} data={data} />
     </div>
   )
