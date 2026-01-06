@@ -1,5 +1,4 @@
 "use client";
-
 import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,17 +8,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ArrowUpDown, Edit, MoreHorizontal, Trash2Icon } from "lucide-react";
-import LocationForm from "@/components/forms/location-form";
-import { formatDistance, subDays } from "date-fns";
-import { LocationDeleteDialog } from "./delete-location";
+import { ArrowUpDown,MoreHorizontal} from "lucide-react";
+import { CategoryDeleteDialog } from "./delete-category";
+import CategoryForm from "@/components/forms/category";
 export type Payment = {
   id: number;
   name: string;
-  region: string;
-  zone: string;
-  wereda: string;
-  created_at: Date;
+  slug: string;
 };
 
 export const columns: ColumnDef<Payment>[] = [
@@ -28,7 +23,7 @@ export const columns: ColumnDef<Payment>[] = [
     header: "Location Name",
   },
   {
-    accessorKey: "region",
+    accessorKey: "slug",
     header: ({ column }) => {
       return (
         <Button
@@ -39,23 +34,6 @@ export const columns: ColumnDef<Payment>[] = [
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       );
-    },
-  },
-  {
-    accessorKey: "zone",
-    header: "Zone",
-  },
-  {
-    accessorKey: "wereda",
-    header: "Wereda",
-  },
-  {
-    accessorKey: "created_at",
-    header: "Created At",
-    cell: ({ row }) => {
-      const created_at = new Date(row.getValue("created_at"));
-      // return formatDistance(created_at, new Date());
-      return formatDistance(created_at, new Date(), {addSuffix: true});
     },
   },
   {
@@ -73,18 +51,17 @@ export const columns: ColumnDef<Payment>[] = [
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem asChild>
-              <LocationForm
-                location={{
+              <CategoryForm
+                category ={{
                   id: row.original.id,
                   name: row.original.name,
-                  region: row.original.region,
-                  zone: row.original.zone,
-                  wereda: row.original.wereda,
+                  slug: row.original.slug,
+               
                 }}
               />
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem variant="destructive" asChild><LocationDeleteDialog data={{id:row.original.id,
+            <DropdownMenuItem variant="destructive" asChild><CategoryDeleteDialog data={{id:row.original.id,
             name: row.original.name,
             message:"Are You Sure Delete"
 

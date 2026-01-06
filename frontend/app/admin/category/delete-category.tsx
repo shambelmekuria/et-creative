@@ -1,5 +1,5 @@
 "use client"
-import { deleteLocation } from "@/actions/location";
+import { deleteCategory } from "@/actions/category";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -11,22 +11,21 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-type deleteLocationData = {
+type deleteCategoryData = {
   id: number,
   name: string,
   message: string
 }
-type LocationDeleteDialogProps = {
-  data: deleteLocationData
+type CategoryDeleteDialogProps = {
+  data: deleteCategoryData
 }
 
-export function LocationDeleteDialog({ data }: LocationDeleteDialogProps) {
+export function CategoryDeleteDialog({ data }: CategoryDeleteDialogProps) {
   const [open, setOpen] = useState(false)
   async function handleDelete() {
-    const res = await deleteLocation(data.id);
+    const res = await deleteCategory(data.id);
     if (res.success){
       setOpen(false)
     }
@@ -44,7 +43,7 @@ export function LocationDeleteDialog({ data }: LocationDeleteDialogProps) {
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Delete Location</DialogTitle>
+          <DialogTitle>Delete Category</DialogTitle>
           <DialogDescription>
             This action will permanently delete this item. You won’t be able
             to recover it later.

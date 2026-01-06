@@ -3,15 +3,24 @@
 import * as React from "react"
 import {
   AudioWaveform,
+  BadgeDollarSign,
+  BarChart3,
   BookOpen,
   Bot,
+  CheckCircle,
+  Clock,
   Command,
   Frame,
   GalleryVerticalEnd,
+  Layers,
+  LayoutDashboard,
   Map,
+  MapPin,
+  Package,
   PieChart,
   Settings2,
   SquareTerminal,
+  XCircle,
 } from "lucide-react"
 
 import { NavMain } from "@/components/nav-main"
@@ -52,106 +61,91 @@ const data = {
   ],
   navMain: [
     {
-      title: "Playground",
-      url: "#",
-      icon: SquareTerminal,
-      isActive: true,
-      items: [
-        {
-          title: "History",
-          url: "#",
-        },
-        {
-          title: "Starred",
-          url: "#",
-        },
-        {
-          title: "Settings",
-          url: "#",
-        },
-      ],
+      title: "Products",
+      url: "/admin/products",
+      icon: Package,
     },
     {
-      title: "Models",
-      url: "#",
-      icon: Bot,
-      items: [
-        {
-          title: "Genesis",
-          url: "#",
-        },
-        {
-          title: "Explorer",
-          url: "#",
-        },
-        {
-          title: "Quantum",
-          url: "#",
-        },
-      ],
+      title: "Categories",
+      url: "/admin/category",
+      icon: Layers,
     },
     {
-      title: "Documentation",
-      url: "#",
-      icon: BookOpen,
-      items: [
-        {
-          title: "Introduction",
-          url: "#",
-        },
-        {
-          title: "Get Started",
-          url: "#",
-        },
-        {
-          title: "Tutorials",
-          url: "#",
-        },
-        {
-          title: "Changelog",
-          url: "#",
-        },
-      ],
+      title: "Locations",
+      url: "/admin/location",
+      icon: MapPin,
     },
     {
-      title: "Settings",
-      url: "#",
-      icon: Settings2,
-      items: [
-        {
-          title: "General",
-          url: "#",
-        },
-        {
-          title: "Team",
-          url: "#",
-        },
-        {
-          title: "Billing",
-          url: "#",
-        },
-        {
-          title: "Limits",
-          url: "#",
-        },
-      ],
+      title: "Sales",
+      url: "/admin/sales",
+      icon: BadgeDollarSign,
     },
+    {
+      title: "Pending",
+      url: "/admin/pending",
+      icon: Clock,
+    },
+    {
+      title: "Active",
+      url: "/admin/active",
+      icon: CheckCircle,
+    },
+    {
+      title: "Rejected",
+      url: "/admin/rejected",
+      icon: XCircle,
+    },
+    {
+      title: "Reports",
+      url: "/admin/reports",
+      icon: BarChart3,
+    }
   ],
   projects: [
     {
-      name: "Design Engineering",
-      url: "#",
-      icon: Frame,
+      name: "Dashboard",
+      url: "/admin",
+      icon: LayoutDashboard,
     },
     {
-      name: "Sales & Marketing",
-      url: "#",
-      icon: PieChart,
+      name: "Products",
+      url: "/admin/products",
+      icon: Package,
     },
     {
-      name: "Travel",
-      url: "#",
-      icon: Map,
+      name: "Categories",
+      url: "/admin/category",
+      icon: Layers,
+    },
+    {
+      name: "Locations",
+      url: "/admin/location",
+      icon: MapPin,
+    },
+    {
+      name: "Sales",
+      url: "/admin/sales",
+      icon: BadgeDollarSign,
+    },
+    {
+      name: "Pending",
+      url: "/admin/pending",
+      icon: Clock,
+    },
+    {
+      name: "Active",
+      url: "/admin/active",
+      icon: CheckCircle,
+    },
+    {
+      name: "Rejected",
+      url: "/admin/rejected",
+      icon: XCircle,
+    },
+    {
+      name: "Reports",
+      url: "/admin/reports",
+      icon: BarChart3,
     },
   ],
 }
@@ -164,7 +158,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
-        <NavProjects projects={data.projects} />
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={data.user} />

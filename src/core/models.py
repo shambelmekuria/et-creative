@@ -6,8 +6,9 @@ from users.models import User
 # --------------------------
 #    Products Categories  |
 # -------------------------
-class Categorie(models.Model):
+class Category(models.Model):
     name = models.CharField(max_length=250)
+    slug = models.SlugField(unique=True)
 
     class Meta:
         verbose_name = "Categorie"
@@ -25,8 +26,8 @@ class Location(models.Model):
     region = models.CharField(max_length=250, null=True, blank=True)
     zone = models.CharField(max_length=250, null=True, blank=True)
     wereda = models.CharField(max_length=250, null=True, blank=True)
-    created_at = models.DateField(auto_now_add=True)
-    updated_at = models.DateField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         verbose_name = "Location"

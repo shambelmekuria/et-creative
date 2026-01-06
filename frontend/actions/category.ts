@@ -4,10 +4,10 @@ import axios from "axios";
 import { getToken } from "./token";
 import { revalidatePath } from "next/cache";
 
-export async function fetchLocation() {
+export async function fetchCategories() {
     try {
         const token = await getToken()
-        const res = await axios.get(`${DJANGO_BASE_URL}/api/location/`, {
+        const res = await axios.get(`${DJANGO_BASE_URL}/api/category/`, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
@@ -19,12 +19,12 @@ export async function fetchLocation() {
     }
 }
 
-export async function setLocation(data: { name: string, region: string, zone: string, wereda: string }, id?: number) {
+export async function setCategories(data: { name: string, slug: string }, id?: number) {
     const token = await getToken()
-    // Update Location
+    // Update category
     if (id) {
         try {
-            const res = axios.put(`${DJANGO_BASE_URL}/api/location/${id}/`, data, {
+            const res = axios.put(`${DJANGO_BASE_URL}/api/category/${id}/`, data, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
@@ -38,7 +38,7 @@ export async function setLocation(data: { name: string, region: string, zone: st
     // Create New
     else {
         try {
-            const res = axios.post(`${DJANGO_BASE_URL}/api/location/`, data, {
+            const res = axios.post(`${DJANGO_BASE_URL}/api/category/`, data, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
@@ -53,11 +53,11 @@ export async function setLocation(data: { name: string, region: string, zone: st
 }
 
 
-export async function deleteLocation(id: number) {
+export async function deleteCategory(id: number) {
     try {
         const token = await getToken()
-        await axios.delete(`${DJANGO_BASE_URL}/api/location/${id}/`, { headers: { Authorization: `Bearer ${token}` } })
-        revalidatePath("/admin/location");
+        await axios.delete(`${DJANGO_BASE_URL}/api/category/${id}/`, { headers: { Authorization: `Bearer ${token}` } })
+        revalidatePath("/admin/category");
         return { success: true }
     }
     catch {

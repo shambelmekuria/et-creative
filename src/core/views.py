@@ -1,12 +1,12 @@
 from django.shortcuts import render
 from rest_framework.viewsets import ModelViewSet
-from .models import Categorie, Location, Product
-from .serializers import CategorieSerializer, LocationSerializer, ProductSerializer
+from .models import Category, Location, Product
+from .serializers import CategorySerializer, LocationSerializer, ProductSerializer
 from rest_framework.permissions import IsAuthenticated
 
-class CategorieViewSet(ModelViewSet):
-    queryset = Categorie.objects.all()
-    serializer_class = CategorieSerializer
+class CategoryViewSet(ModelViewSet):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
     permission_classes = [IsAuthenticated]
 
 class LocationViewSet(ModelViewSet):

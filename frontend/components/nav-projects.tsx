@@ -3,6 +3,7 @@
 import {
   Folder,
   Forward,
+  LayoutDashboard,
   MoreHorizontal,
   Trash2,
   type LucideIcon,
@@ -24,6 +25,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
+import { Badge } from "./ui/badge"
 
 export function NavProjects({
   projects,
@@ -37,8 +39,19 @@ export function NavProjects({
   const { isMobile } = useSidebar()
 
   return (
+   <>
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
-      <SidebarGroupLabel>Projects</SidebarGroupLabel>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild>
+              <a>
+                <LayoutDashboard/>
+                <span>Dashboard</span>
+              </a>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+       <SidebarGroupLabel>Administration</SidebarGroupLabel>
+      </SidebarMenu>
       <SidebarMenu>
         {projects.map((item) => (
           <SidebarMenuItem key={item.name}>
@@ -47,43 +60,18 @@ export function NavProjects({
                 <item.icon />
                 <span>{item.name}</span>
               </a>
+              
             </SidebarMenuButton>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <SidebarMenuAction showOnHover>
-                  <MoreHorizontal />
-                  <span className="sr-only">More</span>
-                </SidebarMenuAction>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                className="w-48 rounded-lg"
-                side={isMobile ? "bottom" : "right"}
-                align={isMobile ? "end" : "start"}
-              >
-                <DropdownMenuItem>
-                  <Folder className="text-muted-foreground" />
-                  <span>View Project</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <Forward className="text-muted-foreground" />
-                  <span>Share Project</span>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem>
-                  <Trash2 className="text-muted-foreground" />
-                  <span>Delete Project</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+               <Badge
+          className="h-5 min-w-5 rounded-full px-1 font-mono tabular-nums"
+          variant="destructive"
+        >
+          99
+        </Badge>
           </SidebarMenuItem>
         ))}
-        <SidebarMenuItem>
-          <SidebarMenuButton className="text-sidebar-foreground/70">
-            <MoreHorizontal className="text-sidebar-foreground/70" />
-            <span>More</span>
-          </SidebarMenuButton>
-        </SidebarMenuItem>
       </SidebarMenu>
     </SidebarGroup>
+   </>
   )
 }

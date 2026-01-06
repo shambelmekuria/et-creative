@@ -1,0 +1,2 @@
+After delete use 
+ revalidatePath("/admin/location");

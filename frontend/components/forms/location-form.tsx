@@ -64,12 +64,14 @@ export default function LocationForm({ location }: LocationFormProps) {
       const res = await setLocation(data, location.id);
       if (res.success) {
         setOpen(false);
+        form.reset()
         router.refresh()
       }
     } else {
       const res = await setLocation(data);
       if (res.success) {
         setOpen(false);
+        form.reset()
         router.refresh()
       }
     }
@@ -80,8 +82,7 @@ export default function LocationForm({ location }: LocationFormProps) {
         {location ? (
           <Button
             variant="ghost"
-            className="font-normal flex items-center justify-start w-full mx-0"
-          >
+            className="font-normal flex items-center justify-start w-full mx-0">
             Edit
           </Button>
         ) : (

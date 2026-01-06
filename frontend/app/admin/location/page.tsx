@@ -19,8 +19,8 @@ const fetcher = async (url: string) => {
 
 export default async function Page() {
   const data = await fetchLocation()
-  // const { data, error } = useSWR("/api/locations/", fetcher);
-  // console.log("data")
+  // const { data , error } = useSWR("/api/locations/", fetcher);
+  console.log("data")
 
   return (
     <div className="container mx-auto py-10">
