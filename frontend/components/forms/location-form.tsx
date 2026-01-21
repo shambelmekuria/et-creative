@@ -92,7 +92,6 @@ export default function LocationForm({ location }: LocationFormProps) {
       <SheetContent>
         <SheetHeader>
           <SheetTitle className="text-lg">
-            {" "}
             {location ? "Edit Location" : "Add Location"}
           </SheetTitle>
           <SheetDescription>
