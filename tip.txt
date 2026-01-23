@@ -3,3 +3,4 @@
     #-------------------------------------------------------------------
          def perform_create(self, serializer):
             serializer.save(owner=self.request.user)
+git clone https://github.com/shambelmekuria/et-creative.git
