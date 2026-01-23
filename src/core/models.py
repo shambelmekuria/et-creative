@@ -66,6 +66,9 @@ class Product(models.Model):
     )
     saler_email = models.CharField(max_length=250)
     saler_telegram_url = models.URLField(max_length=200)
+    saler_phone = models.CharField(
+        _("Saler Phone"), blank=True, null=True, max_length=50
+    )
 
     # ----------------------------------
     #       Aditional Info and Status   |
@@ -79,6 +82,7 @@ class Product(models.Model):
     - start_date: The date when the feature becomes active (posted).
     - end_date: The date when the feature should be removed from the front page.
     """
+
     def __str__(self):
         return self.name
 

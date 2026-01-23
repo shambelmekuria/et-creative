@@ -6,14 +6,6 @@ import {
     FieldGroup,
     FieldLabel,
 } from "@/components/ui/field";
-import {
-    Sheet,
-    SheetContent,
-    SheetDescription,
-    SheetHeader,
-    SheetTitle,
-    SheetTrigger,
-} from "@/components/ui/sheet";
 
 import {
     Dialog,
@@ -101,6 +93,7 @@ export default function CategoryForm({ category }: categoryFormProps) {
                                         id="category-name"
                                         aria-invalid={fieldState.invalid}
                                         autoComplete="off"
+                                        placeholder="Enter category name"
                                     />
                                     {fieldState.invalid && (
                                         <FieldError errors={[fieldState.error]} />
@@ -122,6 +115,7 @@ export default function CategoryForm({ category }: categoryFormProps) {
                                         id="slug"
                                         aria-invalid={fieldState.invalid}
                                         autoComplete="off"
+                                        placeholder="Enter slug"
                                     />
                                     {fieldState.invalid && (
                                         <FieldError errors={[fieldState.error]} />

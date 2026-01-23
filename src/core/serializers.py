@@ -14,11 +14,12 @@ class LocationSerializer(ModelSerializer):
 
 class ProductSerializer(ModelSerializer):
     owner = serializers.HiddenField(default=serializers.CurrentUserDefault())
+    saler_location = LocationSerializer() # add read only prevent from update
     class Meta:
         model = Product
         fields = [
             'id', 'owner', 'name', 'description', 'price', 'code', 'saler_name', 'saler_location', 
-            'saler_email', 'saler_telegram_url', 'status', 'is_sold', 
+            'saler_email', 'saler_phone','saler_telegram_url', 'status', 'is_sold', 
             'created_at', 'update_at'
         ]
         read_only_fields = ['created_at', 'update_at']
