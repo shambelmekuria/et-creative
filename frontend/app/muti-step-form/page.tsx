@@ -39,10 +39,7 @@ export default function Page() {
   });
 
   const { step, steps, currentStepIndex, isFirstStep, isLastStep, back, next } =
-    useMultStepForm([
-      <UserForm />,
-      <AddressForm />,
-    ]);
+    useMultStepForm([<UserForm />, <AddressForm />]);
   async function onSubmit(data: FormValues) {
     console.log("Submit Clicked");
     // if (!isLastStep) {
@@ -50,7 +47,7 @@ export default function Page() {
     //   next();
     //   return;
     // }
-      if (!isLastStep) {
+    if (!isLastStep) {
       await form.trigger(); // validate current step
       return next();
     }
