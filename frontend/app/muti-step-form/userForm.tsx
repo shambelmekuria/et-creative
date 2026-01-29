@@ -1,35 +1,39 @@
+
+import { Controller, useFormContext } from "react-hook-form";
 import FormWrapper from "./formWrapper";
-type UserData = {
-  firstName: string;
-  lastName: string;
-};
-type UserFormProps = UserData & {
-  updateFields: (fields: Partial<UserData>) => void;
-};
-function UserForm({ firstName, lastName, updateFields }: UserFormProps) {
+import { Field, FieldError, FieldLabel } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+function UserForm() {
+  const {register,formState: { errors },control} = useFormContext();
   return (
     <FormWrapper title="Personal Information">
-      <label>First Name</label>
-      <br />
-      <input
-        autoFocus
-        required
-        type="text"
-        name="firstName"
-        value={firstName}
-        onChange={(e) => updateFields({ firstName: e.target.value })}
-      />
-      <br />
-      <br />
-
+      <Controller
+              name="firstName"
+              control={control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor="form-rhf-demo-title">
+                    First  Name
+                  </FieldLabel>
+                  <Input
+                    {...field}
+                    id="form-rhf-demo-title"
+                    aria-invalid={fieldState.invalid}
+                    placeholder="Login button not working on mobile"
+                    autoComplete="off"
+                  />
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
+              )}
+            />
       <label>Last Name</label>
       <br />
       <input
         required
         type="text"
-        name="lastName"
-        value={lastName}
-        onChange={(e) => updateFields({ lastName: e.target.value })}
+       {...register('lastName')}
       />
       <br />
       <br />

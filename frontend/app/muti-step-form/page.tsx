@@ -1,73 +1,80 @@
 "use client";
 import React, { FormEvent, useState } from "react";
-import useMultStepForm from "./useMultStepForm";
+import useMultStepForm from "../../hooks/useMultStepForm";
 import { Button } from "@/components/ui/button";
 import UserForm from "./userForm";
 import AddressForm from "./addressForm";
 import AccountForm from "./acccontForm";
+import { FormProvider, useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
-export interface FormData {
-  // AccountForm
-  email: string;
-  password: string;
+const FormSchema = z.object({
+  firstName: z.string().min(1),
+  lastName: z.string(),
+  email: z.string().optional(),
+  password: z.string(),
+  street: z.string(),
+  city: z.string(),
+  state: z.string(),
+  zip: z.string(),
+});
 
-  // UserForm
-  firstName: string;
-  lastName: string;
-
-  // AddressForm
-  street: string;
-  city: string;
-  state: string;
-  zip: string;
-}
-
-export const initialFormData: FormData = {
-  email: "",
-  password: "",
-
-  firstName: "",
-  lastName: "",
-
-  street: "",
-  city: "",
-  state: "",
-  zip: "",
-};
+type FormValues = z.infer<typeof FormSchema>;
 
 export default function Page() {
-  const [data, setData] = useState(initialFormData);
-  function updateFields(fields: Partial<FormData>) {
-    setData((prev) => {
-      return { ...prev, ...fields };
-    });
-  }
+  const form = useForm<FormValues>({
+    resolver: zodResolver(FormSchema),
+    defaultValues: {
+      firstName: "shambel",
+      lastName: "mekuriaya",
+      email: "",
+      password: "",
+      street: "",
+      city: "",
+      state: "",
+      zip: "",
+    },
+    mode: "onChange",
+  });
+
   const { step, steps, currentStepIndex, isFirstStep, isLastStep, back, next } =
     useMultStepForm([
-      <UserForm {...data} updateFields={updateFields} />,
-      <AddressForm {...data} updateFields={updateFields}/>,
-      <AccountForm {...data} updateFields={updateFields}/>,
+      <UserForm />,
+      <AddressForm />,
     ]);
-  function onSubmit(e: FormEvent) {
-    e.preventDefault();
-    next();
+  async function onSubmit(data: FormValues) {
+    console.log("Submit Clicked");
+    // if (!isLastStep) {
+    //   await form.trigger(); // validate current step
+    //   next();
+    //   return;
+    // }
+      if (!isLastStep) {
+      await form.trigger(); // validate current step
+      return next();
+    }
+
+    console.log("FINAL DATA ✅", data);
   }
   return (
     <div className="relative border p-10  rounded m-6">
-      <form onSubmit={onSubmit}>
-        <div className="absolute top-2 right-2">
-          {currentStepIndex + 1}/{steps.length}
-        </div>
-        {step}
-        <div className="mt-5 flex justify-end gap-3">
-          {!isFirstStep && (
-            <Button onClick={back} type="button">
-              Back
-            </Button>
-          )}
-          <Button type="submit">{isLastStep ? "Finish" : "Next"}</Button>
-        </div>
-      </form>
+      <FormProvider {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} noValidate>
+          <div className="absolute top-2 right-2">
+            {currentStepIndex + 1}/{steps.length}
+          </div>
+          {step}
+          <div className="mt-5 flex justify-end gap-3">
+            {!isFirstStep && (
+              <Button onClick={back} type="button">
+                Back
+              </Button>
+            )}
+            <Button type="submit">{isLastStep ? "Finish" : "Next"}</Button>
+          </div>
+        </form>
+      </FormProvider>
     </div>
   );
 }

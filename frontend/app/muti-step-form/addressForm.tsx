@@ -1,46 +1,33 @@
+import { useFormContext } from "react-hook-form";
 import FormWrapper from "./formWrapper";
-type AddressData = {
-  street: string;
-  city: string;
-  state: string;
-  zip: string;
-};
-type AddressFormProps = AddressData & {
-  updateFields: (fields: Partial<AddressData>) => void;
-};
 
-function AddressForm({ street, city, state, zip,updateFields }: AddressFormProps) {
+
+function AddressForm() {
+  const {register} = useFormContext()
   return (
     <>
       <FormWrapper title="Address Form">
         <label>Street</label>
         <br />
-        <input type="text" name="street" 
-        value={street}
-        onChange={(e) => updateFields({ street: e.target.value })}
-        />
+        <input type="text" {...register('street')}/>
         <br />
         <br />
 
         <label>City</label>
         <br />
-        <input type="text" name="city"  value={city}
-        onChange={(e) => updateFields({ city: e.target.value })}/>
+        <input type="text" {...register('city')}  />
         <br />
         <br />
 
         <label>State</label>
         <br />
-        <input type="text" name="state"  value={state}
-        onChange={(e) => updateFields({ state: e.target.value })}/>
+        <input type="text" {...register('state')}/>
         <br />
         <br />
 
         <label>Zip Code</label>
         <br />
-        <input type="text" name="zip" 
-        value={zip}
-        onChange={(e) => updateFields({ zip: e.target.value })}/>
+        <input type="text" {...register('zip')}/>
         <br />
         <br />
       </FormWrapper>
