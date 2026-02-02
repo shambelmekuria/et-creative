@@ -1,8 +1,8 @@
 import { useFormContext } from "react-hook-form";
-import FormWrapper from "./formWrapper";
+import FormWrapper from "../formWrapper";
 
 
-function AddressForm() {
+function SalerDetail() {
   const {register} = useFormContext()
   return (
     <>
@@ -35,4 +35,4 @@ function AddressForm() {
   );
 }
 
-export default AddressForm;
+export default SalerDetail;

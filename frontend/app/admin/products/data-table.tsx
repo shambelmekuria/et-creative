@@ -36,12 +36,6 @@ import {
 import { ArrowUpDown, CheckCircle2, ChevronDown, MoreHorizontal, Plus, PlusIcon, XCircle,CheckCircle, Clock } from "lucide-react"
 import { useRouter } from "next/navigation"
 
-export type Payment = {
-  id: string
-  amount: number
-  status: "pending" | "rejected" | "active"
-  name: string
-}
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[]
     data: TData[]

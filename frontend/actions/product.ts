@@ -25,7 +25,7 @@ export async function setProduct(data:Product, id?: string) {
     // Update Product
     if (id) {
         try {
-            const res = axios.put(`${DJANGO_BASE_URL}/api/Product/${id}/`, data, {
+            const res = axios.put(`${DJANGO_BASE_URL}/api/product/${id}/`, data, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
@@ -39,7 +39,7 @@ export async function setProduct(data:Product, id?: string) {
     // Create New
     else {
         try {
-            const res = axios.post(`${DJANGO_BASE_URL}/api/Product/`, data, {
+            const res = axios.post(`${DJANGO_BASE_URL}/api/product/`, data, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
@@ -54,11 +54,11 @@ export async function setProduct(data:Product, id?: string) {
 }
 
 
-export async function deleteProduct(id: number) {
+export async function deleteProduct(id: string) {
     try {
         const token = await getToken()
-        await axios.delete(`${DJANGO_BASE_URL}/api/Product/${id}/`, { headers: { Authorization: `Bearer ${token}` } })
-        revalidatePath("/admin/Product");
+        await axios.delete(`${DJANGO_BASE_URL}/api/product/${id}/`, { headers: { Authorization: `Bearer ${token}` } })
+        revalidatePath("/admin/product");
         return { success: true }
     }
     catch {

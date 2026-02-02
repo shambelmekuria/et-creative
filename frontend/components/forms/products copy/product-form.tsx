@@ -86,22 +86,39 @@ export default function ProductForm({ product }: ProductFormProps) {
           code: "",
           price: "",
           description: "",
+
+          saler_name: "",
+          saler_location: "",
+          saler_email: "",
+          saler_phone: "",
+          saler_telegram_url: "",
+
+          status: "pending",
+          is_sold: false,
         },
-        mode: "onChange",
+    mode: "onChange",
   });
   const { step, steps, currentStepIndex, isFirstStep, isLastStep, back, next } =
     useMultStepForm([<ProductDetail />, <SalerDetail />]);
-async function onSubmit(data: z.infer<typeof ProductSchema>) {
+  async function onSubmit(data: z.infer<typeof ProductSchema>) {
     console.log("Submit Clicked");
     // if (!isLastStep) {
     //   await form.trigger(); // validate current step
     //   next();
     //   return;
     // }
+    // if (!isLastStep) {
+    //   await form.trigger(); // validate current step
+    //   return next();
+    // }
+
     if (!isLastStep) {
-      await form.trigger(); // validate current step
-      return next();
-    }
+  const isValid = await form.trigger()
+  if (!isValid) return
+  next()
+  return
+}
+
 
     console.log("FINAL DATA ✅", data);
   }

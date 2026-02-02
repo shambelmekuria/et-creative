@@ -3,7 +3,7 @@ export type Product = {
   id?: string
   name: string
   description: string
-  price: string
+  price: number
   code: string
   saler_name: string
   // saler_location: Location

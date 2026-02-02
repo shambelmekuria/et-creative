@@ -10,12 +10,14 @@ import {
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { type ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown, MoreHorizontal } from "lucide-react";
 import Status from "./status";
 import { Product } from "@/types/products";
+import { ProductDeleteDialog } from "./delete-product";
 
 export const columns: ColumnDef<Product>[] = [
   {
@@ -96,10 +98,10 @@ export const columns: ColumnDef<Product>[] = [
     },
   },
   {
-    accessorKey: "saler_location",
+    accessorKey: "saler_location_detail",
     header: () => <div>Saler Location</div>,
     cell: ({ row }) => {
-      const location = row.getValue("saler_location") as {
+      const location = row.getValue("saler_location_detail") as {
         name: string;
         region: string;
       };
@@ -130,28 +132,25 @@ export const columns: ColumnDef<Product>[] = [
       const Product = row.original;
 
       return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuGroup>
-              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-              <DropdownMenuItem
-                onClick={() => navigator.clipboard.writeText(Product.id)}
-              >
-                Copy Product ID
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-            <DropdownMenuGroup>
-              <DropdownMenuItem>View customer</DropdownMenuItem>
-              <DropdownMenuItem>View Product details</DropdownMenuItem>
-            </DropdownMenuGroup>
-          </DropdownMenuContent>
-        </DropdownMenu>
+           <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="h-8 w-8 p-0">
+                    <span className="sr-only">Open menu</span>
+                    <MoreHorizontal className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem asChild>
+                 Ehhhhhhhhhhh
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem variant="destructive" asChild><ProductDeleteDialog data={{id:row.original.id,
+                  name: row.original.name,
+                  message:"Are You Sure Delete"
+      
+                  }}/></DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
       );
     },
   },
