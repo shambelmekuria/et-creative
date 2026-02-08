@@ -1,2 +1,4 @@
 After delete use 
  revalidatePath("/admin/location");
+
+ for formData send it type must FormData not File or string or something

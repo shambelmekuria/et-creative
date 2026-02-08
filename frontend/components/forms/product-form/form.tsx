@@ -1,4 +1,5 @@
 "use client";
+import { matchSorter } from "match-sorter";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -39,10 +40,15 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { fetchLocation } from "@/actions/location";
 import { useRouter } from "next/navigation";
 import { setProduct } from "@/actions/product";
+import ProductImageForm from "../product-image/form";
+import { ProductImage, ProductImageResponse } from "@/types/product-image";
+import ProductImageDisplay from "@/components/product/product-image-display";
 
 type FormValues = z.infer<typeof ProductFormSchema>;
 type ProductFormProps = {
   product?: Product;
+  product_id?: string;
+  images: ProductImage[];
 };
 
 const steps = [
@@ -80,8 +86,44 @@ type LocationOption = {
   value: string;
 };
 
-export default function ProductFormMain({ product }: ProductFormProps) {
+export default function ProductFormMain({ product, product_id ,images}: ProductFormProps) {
   const [rawLocations, setRawLocations] = useState<RawLocation[]>([]);
+  const router = useRouter();
+  const [currentStep, setCurrentStep] = useState(1);
+  const [previousStep, setPreviousStep] = useState(1);
+  const [salerLocationInputValue, setSalerLocationInputValue] = useState<
+    string | undefined
+  >(""); // For Update
+  const delta = currentStep - previousStep;
+
+  // Custom filter logic
+  // Solutions #1
+  function onFilter(optionValues: string[], inputValue: string) {
+    if (!inputValue) return optionValues;
+    const search = inputValue.toLowerCase();
+    return locations
+      .filter(
+        (item) =>
+          optionValues.includes(item.value) &&
+          item.label.toLowerCase().includes(search),
+      )
+      .map((item) => item.value);
+  }
+
+  // Solutions #2
+  const handleFilter = (options: string[], search: string) => {
+    // 1. Map the string values back to their full objects
+    const itemsToFilter = locations.filter((item) =>
+      options.includes(item.value),
+    );
+    // 2. Use match-sorter (or .filter) to search specifically on the 'label' key
+    const filtered = matchSorter(itemsToFilter, search, {
+      keys: ["label"],
+      threshold: matchSorter.rankings.MATCHES,
+    });
+    // 3. Return the array of values (IDs) that matched
+    return filtered.map((item) => item.value);
+  };
   async function fetchLocationChoice() {
     const res = await fetchLocation();
     setRawLocations(res);
@@ -90,18 +132,20 @@ export default function ProductFormMain({ product }: ProductFormProps) {
   useEffect(() => {
     fetchLocationChoice();
   }, []);
-
-  // Set Location
   const locations: LocationOption[] = rawLocations.map((item) => ({
     label: `${item?.name} - ${item?.region}`,
     value: String(item?.id),
   }));
 
-  // const locations = rawLocations.map((item) => `${item?.id}`);
-  const router = useRouter();
-  const [currentStep, setCurrentStep] = useState(1);
-  const [previousStep, setPreviousStep] = useState(1);
-  const delta = currentStep - previousStep;
+  useEffect(() => {
+    const location = locations.find(
+      (loc) => loc.value === product?.saler_location,
+    );
+    setSalerLocationInputValue(location?.label);
+  }, [product, locations]);
+
+  // Set Location
+
   const form = useForm<FormValues>({
     resolver: zodResolver(ProductFormSchema),
     defaultValues: product
@@ -113,7 +157,7 @@ export default function ProductFormMain({ product }: ProductFormProps) {
           price: product.price,
           // Saler Related
           saler_name: product.saler_name,
-          saler_location: product.saler_location ?? "",
+          saler_location: product.saler_location,
           saler_email: product.saler_email,
           saler_phone: product.saler_phone,
           saler_telegram_url: product.saler_telegram_url,
@@ -134,7 +178,7 @@ export default function ProductFormMain({ product }: ProductFormProps) {
           saler_phone: "",
           saler_telegram_url: "",
           // Aditional Info and Status
-          status:"pending",
+          status: "pending",
           is_sold: false,
         },
   });
@@ -142,8 +186,14 @@ export default function ProductFormMain({ product }: ProductFormProps) {
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
     try {
-      const res = await setProduct(data);
-      toast.success("Product saved successfully");
+      if (product_id) {
+        const res = await setProduct(data, product_id);
+        toast.success("Product updated successfully");
+      } else {
+        const res = await setProduct(data);
+        toast.success("Product saved successfully");
+      }
+
       router.push("/admin/products");
     } catch (error) {
       console.log("Error", error);
@@ -181,7 +231,9 @@ export default function ProductFormMain({ product }: ProductFormProps) {
         <Tabs defaultValue="products">
           <TabsList>
             <TabsTrigger value="products">Product</TabsTrigger>
-            <TabsTrigger value="gallery">Add Product Gallery</TabsTrigger>
+            {product && (
+              <TabsTrigger value="gallery">Add Product Gallery</TabsTrigger>
+            )}
           </TabsList>
           <TabsContent value="products">
             <div className="space-y-3 mb-3 p-4">
@@ -488,6 +540,9 @@ export default function ProductFormMain({ product }: ProductFormProps) {
                               <Combobox.ComboboxRoot
                                 value={field.value}
                                 onValueChange={field.onChange}
+                                defaultValue={salerLocationInputValue}
+                                // onFilter={handleFilter}
+                                onFilter={handleFilter}
                               >
                                 <Combobox.ComboboxAnchor className="flex h-9 w-full items-center justify-between rounded-md border border-zinc-200 bg-white px-3 py-2 shadow-xs transition-colors data-focused:ring-1 data-focused:ring-zinc-800 dark:border-zinc-800 dark:bg-zinc-950 dark:data-focused:ring-zinc-300">
                                   <Combobox.ComboboxInput
@@ -544,8 +599,16 @@ export default function ProductFormMain({ product }: ProductFormProps) {
               </form>
             </div>
           </TabsContent>
-          <TabsContent value="gallery">
-            <div className="p-4">Gallery</div>
+          <TabsContent value="gallery" id="gallery">
+            <div className="px-4 mt-4">
+              <h1 className="text-xl font-bold">Gallery</h1>
+              <p className="text-muted-foreground mb-4">
+                Lorem ipsum dolor sit amet consectetur, adipisicing elit.
+                Tempore, sint.
+              </p>
+              <ProductImageDisplay images={images}/>
+              <ProductImageForm product_id={product_id} mode="create"/>
+            </div>
           </TabsContent>
         </Tabs>
       </div>

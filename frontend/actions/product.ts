@@ -5,10 +5,11 @@ import { getToken } from "./token";
 import { revalidatePath } from "next/cache";
 import { Product } from "@/types/products";
 
-export async function fetchProduct() {
+export async function fetchProduct(id?:string) {
+    const productEndPoint =id? `${DJANGO_BASE_URL}/api/product/${id}`:`${DJANGO_BASE_URL}/api/product/`;
     try {
         const token = await getToken()
-        const res = await axios.get(`${DJANGO_BASE_URL}/api/product/`, {
+        const res = await axios.get(productEndPoint, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
@@ -20,6 +21,7 @@ export async function fetchProduct() {
     }
 }
 
+
 export async function setProduct(data:Product, id?: string) {
     const token = await getToken()
     // Update Product
@@ -27,9 +29,11 @@ export async function setProduct(data:Product, id?: string) {
         try {
             const res = axios.put(`${DJANGO_BASE_URL}/api/product/${id}/`, data, {
                 headers: {
-                    Authorization: `Bearer ${token}`
+                    Authorization: `Bearer ${token}`,
+                    
                 }
             })
+            revalidatePath("/admin/product");
             return { success: true }
         }
         catch {
@@ -44,6 +48,7 @@ export async function setProduct(data:Product, id?: string) {
                     Authorization: `Bearer ${token}`
                 }
             })
+            revalidatePath("/admin/product");
             return { success: true }
         }
         catch {

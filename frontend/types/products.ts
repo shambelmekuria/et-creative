@@ -1,4 +1,3 @@
-import { Location } from "./location"
 export type Product = {
   id?: string
   name: string

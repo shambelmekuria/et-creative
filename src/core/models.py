@@ -110,9 +110,9 @@ class ProductImage(models.Model):
     order = models.PositiveIntegerField(default=0)
     alt_text = models.TextField(_("Alt Text"))
     created_at = models.DateField(_("Created At"), auto_now_add=True)
-
+    updated_at = models.DateField(_("Created At"), auto_now =True)
     def __str__(self):
-        pass
+        return f"Image of {self.product.name}-{self.alt_text}"
 
     class Meta:
         db_table = ""

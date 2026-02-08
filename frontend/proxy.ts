@@ -59,13 +59,22 @@ export async function proxy(request: NextRequest) {
     // Can use fetch API instead of rewrite if needed to call refresh endpoint
 
     // Role-based access control using path regex
-    if (admin_paths_regex.test(pathname) && decoded.role !== 'admin') {
-        return NextResponse.redirect(new URL('/unauthorized', request.url));
+    // if (admin_paths_regex.test(pathname) && decoded.role !== 'admin') {
+    //     return NextResponse.redirect(new URL('/unauthorized', request.url));
+    // }
+
+    // if (user_paths_regex.test(pathname) && decoded.role !== 'user') {
+    //     return NextResponse.redirect(new URL('/unauthorized', request.url));
+    // }
+    if (admin_paths_regex.test(pathname) && decoded.role === 'admin') {
+        return NextResponse.next();
     }
 
-    if (user_paths_regex.test(pathname) && decoded.role !== 'user') {
-        return NextResponse.redirect(new URL('/unauthorized', request.url));
+  if (user_paths_regex.test(pathname) && decoded.role === 'user') {
+        return NextResponse.next();
     }
+
+
 
     return NextResponse.next();
 }

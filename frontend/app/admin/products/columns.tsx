@@ -18,6 +18,7 @@ import { ArrowUpDown, MoreHorizontal } from "lucide-react";
 import Status from "./status";
 import { Product } from "@/types/products";
 import { ProductDeleteDialog } from "./delete-product";
+import { useRouter } from "next/navigation";
 
 export const columns: ColumnDef<Product>[] = [
   {
@@ -130,6 +131,7 @@ export const columns: ColumnDef<Product>[] = [
     enableHiding: false,
     cell: ({ row }) => {
       const Product = row.original;
+      const router = useRouter()
 
       return (
            <DropdownMenu>
@@ -140,10 +142,9 @@ export const columns: ColumnDef<Product>[] = [
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem asChild>
-                 Ehhhhhhhhhhh
-                  </DropdownMenuItem>
+                  <DropdownMenuLabel>Actions</DropdownMenuLabel>
                   <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={()=>router.push(`/admin/products/${row.original.id}`)}>Edit</DropdownMenuItem>
                   <DropdownMenuItem variant="destructive" asChild><ProductDeleteDialog data={{id:row.original.id,
                   name: row.original.name,
                   message:"Are You Sure Delete"
