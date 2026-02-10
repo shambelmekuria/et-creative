@@ -1,10 +1,9 @@
 "use server"
 import { DJANGO_BASE_URL } from "@/config/defualt";
 import axios from "axios";
-import { getToken } from "./token";
 import { revalidatePath } from "next/cache";
-import { Product } from "@/types/products";
-import { ProductImage, ProductImageCreate } from "@/types/product-image";
+import { getToken, isTokenExpiredOrInvalid } from "./token";
+import { redirect } from "next/navigation";
 
 /*************************************/
 /*   Fetching Items By Id or All      */
@@ -36,47 +35,56 @@ export async function deleteItem(endPoint: string, id: string) {
 // **           Create or Update Items             */
 //*************************************************/
 
-export async function setItem(endPoint: string, data:FormData, id?: string) {
-    const token = await getToken()
-    // Update Product
-    if (id) {
-        try {
-            const res = axios.patch(`${DJANGO_BASE_URL}/${endPoint}/${id}/`, data, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    "Content-Type": "multipart/form-data",
-                }
-            })
-            revalidatePath(`/admin/product/${id}`);
-            return { success: true }
+export async function setItem(endPoint: string, data: FormData, id?: string) {
+ try{
+       // ✅ Token check happens on server
+        const token = await getToken();
+        // Update Product
+        if (id) {
+            try {
+                const res = await axios.patch(`${DJANGO_BASE_URL}/${endPoint}/${id}/`, data, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        "Content-Type": "multipart/form-data",
+                    }
+                })
+    
+                revalidatePath(`/admin/product/${id}`);
+                return { success: true }
+            }
+            catch {
+                return { message: "updating Error", success: false }
+            }
         }
-        catch {
-            return { message: "updating Error", success: false }
+        // Create New
+        else {
+            try {
+                const res = await axios.post(`${DJANGO_BASE_URL}/${endPoint}/`, data, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        "Content-Type": "multipart/form-data",
+                    }
+                })
+                revalidatePath(`/admin/product/${id}`);
+                return { success: true }
+            }
+            catch {
+                return { message: "creating error", success: false }
+            }
         }
-    }
-    // Create New
-    else {
-        try {
-            const res = axios.post(`${DJANGO_BASE_URL}/${endPoint}/`, data, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    "Content-Type": "multipart/form-data",
-                }
-            })
-            revalidatePath(`/admin/product/${id}`);
-            return { success: true }
-        }
-        catch {
-            return { message: "creating error", success: false }
-        }
+ }
+ catch(error){
+    console.log(error)
+     return { message: "creating error", success: false }
+ }
     }
 
-}
+
 
 
 // SWR fetcher
 
-export const swrFetcher = async (url: string,id:string) => {
+export const swrFetcher = async (url: string, id: string) => {
     const URL = id ? `${DJANGO_BASE_URL}/${url}/${id}` : `${DJANGO_BASE_URL}/${url}/`;
     const token = await getToken()
 

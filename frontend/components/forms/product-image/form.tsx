@@ -41,6 +41,7 @@ import * as z from "zod";
 import { setItem } from "@/actions/product-image";
 import { ProductImage } from "@/types/product-image";
 import { useRouter } from "next/navigation";
+import { isTokenExpiredOrInvalid } from "@/actions/token";
 
 const baseSchema = {
   product: z.string(),
@@ -191,13 +192,22 @@ export default function ProductImageForm({
       }
     }
     if (mode == "update") {
-      const res = await setItem("api/product-image", formData, image_data?.id);
-      if (res.success) {
-        toast.success("Product Images has been updated");
-        form.reset();
-        setOpen(false);
-      } else {
-        toast.error(res.message);
+      try {
+        const res = await setItem(
+          "api/product-image",
+          formData,
+          image_data?.id,
+        );
+        if (res.success) {
+          toast.success("Product Images has been updated");
+          form.reset();
+          setOpen(false);
+        } else {
+          toast.error(res.message);
+        }
+      } catch (error) {
+        toast.error("Unexpected error. Please refresh the page.")
+        router.refresh();
       }
     }
   };

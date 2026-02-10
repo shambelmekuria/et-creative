@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import { Trash } from "lucide-react";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export function DeleteProductImage({
   product_image_id,
@@ -21,10 +22,12 @@ export function DeleteProductImage({
   product_image_id: string;
 }) {
   const [open, setOpen] = useState(false);
+  const router = useRouter()
   const handleDelete = async () => {
     const res = await deleteItem("api/product-image", product_image_id);
     if (res.success) {
       toast.success("Product image deleted");
+      router.refresh()
     } else {
       toast.error(res.message);
     }

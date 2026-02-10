@@ -47,7 +47,7 @@ import ProductImageDisplay from "@/components/product/product-image-display";
 type FormValues = z.infer<typeof ProductFormSchema>;
 type ProductFormProps = {
   product?: Product;
-  product_id?: string;
+  product_id: string;
   images: ProductImage[];
 };
 

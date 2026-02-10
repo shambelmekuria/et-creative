@@ -1,9 +1,10 @@
 "use server"
 import { DJANGO_BASE_URL } from "@/config/defualt";
 import axios from "axios";
-import { getToken } from "./token";
+import { getToken, isTokenExpiredOrInvalid } from "./token";
 import { revalidatePath } from "next/cache";
 import { Product } from "@/types/products";
+import { redirect, RedirectType } from 'next/navigation'
 
 export async function fetchProduct(id?:string) {
     const productEndPoint =id? `${DJANGO_BASE_URL}/api/product/${id}`:`${DJANGO_BASE_URL}/api/product/`;
@@ -27,7 +28,7 @@ export async function setProduct(data:Product, id?: string) {
     // Update Product
     if (id) {
         try {
-            const res = axios.put(`${DJANGO_BASE_URL}/api/product/${id}/`, data, {
+            const res = await axios.put(`${DJANGO_BASE_URL}/api/product/${id}/`, data, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                     
