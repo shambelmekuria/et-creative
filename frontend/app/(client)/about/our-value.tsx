@@ -13,7 +13,8 @@ import { FaMobile, FaShop } from 'react-icons/fa6';
 
 export default function OurValue() {
   return (
-    <section className='max-w-4xl mx-auto w-full my-24'>
+    <div className='bg-neutral-100 dark:bg-neutral-900 px-8 py-16'>
+         <section className='max-w-4xl mx-auto w-full'>
         <div className='flex flex-col justify-center items-center gap-2 mb-8'>
             <h1 className='text-2xl font-bold'>Our Service</h1>
             <p>Lorem ipsum dolor sit amet consectetur.</p>
@@ -60,5 +61,7 @@ export default function OurValue() {
           </Card>
         </div>
     </section>
+    </div>
+   
   )
 }
