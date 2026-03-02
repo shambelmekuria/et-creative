@@ -46,7 +46,7 @@ class ProductSerializer(ModelSerializer):
             'images',
             "saler_email",
             "saler_phone",
-            "saler_telegram_url",
+            "seller_telegram_username",
             "status",
             "is_sold",
             "created_at",

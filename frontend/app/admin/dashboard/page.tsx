@@ -1,28 +1,24 @@
-import { AppSidebar } from "@/components/app-sidebar"
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
-import { Separator } from "@/components/ui/separator"
-import {
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger,
-} from "@/components/ui/sidebar"
-
+import { SaleChart } from "@/components/dashboard/chart";
+import Count from "@/components/dashboard/count";
+import { Check, X } from "lucide-react";
 export default function Page() {
   return (
-   <>
-   <div className="grid auto-rows-min gap-4 md:grid-cols-3">
-            <div className="bg-muted/50 aspect-video rounded-xl" />
-            <div className="bg-muted/50 aspect-video rounded-xl" />
-            <div className="bg-muted/50 aspect-video rounded-xl" />
-          </div>
-          <div className="bg-muted/50 min-h-[100vh] flex-1 rounded-xl md:min-h-min" />
-   </>
-  )
+    <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-3">
+        <p className="text-2xl font-bold">Dashboard</p>
+        <p className="text-sm  text-muted-foreground">
+          Lorem ipsum dolor sit, amet consectetur adipisicing elit.
+        </p>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-[2fr_1fr] gap-4">
+        <div className="grid auto-rows-min gap-4 sm:grid-cols-2  ">
+        <Count/>
+        </div>
+        <div>
+        <SaleChart/>
+        </div>
+      </div>
+      <div className="bg-muted/50 min-h-[100vh] flex-1 rounded-xl md:min-h-min" />
+    </div>
+  );
 }

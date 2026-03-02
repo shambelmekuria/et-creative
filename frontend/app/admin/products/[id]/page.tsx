@@ -20,7 +20,7 @@ export default async function ProductUpatePage({
         saler_location: String(data.saler_location_detail.id),
         saler_email: data.saler_email,
         saler_phone: data.saler_phone,
-        saler_telegram_url: data.saler_telegram_url,
+        seller_telegram_username: data.seller_telegram_username,
         status: data.status,
         is_sold: data.is_sold,
       }}

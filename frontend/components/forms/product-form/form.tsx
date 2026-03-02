@@ -65,7 +65,7 @@ const steps = [
       "saler_location",
       "saler_email",
       "saler_phone",
-      "saler_telegram_url",
+      "saler_telegram_username",
     ],
   },
 ];
@@ -86,7 +86,11 @@ type LocationOption = {
   value: string;
 };
 
-export default function ProductFormMain({ product, product_id ,images}: ProductFormProps) {
+export default function ProductFormMain({
+  product,
+  product_id,
+  images,
+}: ProductFormProps) {
   const [rawLocations, setRawLocations] = useState<RawLocation[]>([]);
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(1);
@@ -160,7 +164,7 @@ export default function ProductFormMain({ product, product_id ,images}: ProductF
           saler_location: product.saler_location,
           saler_email: product.saler_email,
           saler_phone: product.saler_phone,
-          saler_telegram_url: product.saler_telegram_url,
+          seller_telegram_username: product.seller_telegram_username,
           // Aditional Info and Status
           status: product.status,
           is_sold: product.is_sold,
@@ -176,7 +180,7 @@ export default function ProductFormMain({ product, product_id ,images}: ProductF
           saler_location: "",
           saler_email: "",
           saler_phone: "",
-          saler_telegram_url: "",
+          seller_telegram_username: "",
           // Aditional Info and Status
           status: "pending",
           is_sold: false,
@@ -185,6 +189,7 @@ export default function ProductFormMain({ product, product_id ,images}: ProductF
   type FieldName = keyof FormValues;
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
+    console.log("data....",data)
     try {
       if (product_id) {
         const res = await setProduct(data, product_id);
@@ -196,7 +201,8 @@ export default function ProductFormMain({ product, product_id ,images}: ProductF
 
       router.push("/admin/products");
     } catch (error) {
-      console.log("Error", error);
+      toast.error("Unexpected error. Please refresh the page.");
+      router.refresh();
     }
   };
 
@@ -505,11 +511,11 @@ export default function ProductFormMain({ product, product_id ,images}: ProductF
                           )}
                         />
                         <Controller
-                          name="saler_telegram_url"
+                          name="seller_telegram_username"
                           control={form.control}
                           render={({ field, fieldState }) => (
                             <Field data-invalid={fieldState.invalid}>
-                              <FieldLabel>Telegram URL</FieldLabel>
+                              <FieldLabel>Telegram Username</FieldLabel>
                               <Input
                                 type="text"
                                 {...field}
@@ -606,8 +612,8 @@ export default function ProductFormMain({ product, product_id ,images}: ProductF
                 Lorem ipsum dolor sit amet consectetur, adipisicing elit.
                 Tempore, sint.
               </p>
-              <ProductImageDisplay images={images}/>
-              <ProductImageForm product_id={product_id} mode="create"/>
+              <ProductImageDisplay images={images} />
+              <ProductImageForm product_id={product_id} mode="create" />
             </div>
           </TabsContent>
         </Tabs>

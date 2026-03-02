@@ -6,6 +6,7 @@ import { Product, ProductResponse } from '@/types/products'
 
  export default async function Page() {
   const data:ProductResponse = await fetchProduct()
+  console.log("data.....",data)
   return (
     <div>
       <ProductDataTable columns={columns} data={data} />

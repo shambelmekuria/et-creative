@@ -22,6 +22,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
 import { setLocation } from "@/actions/location";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 const LocationSchema = z.object({
   name: z.string().min(2).max(100),
@@ -42,7 +43,7 @@ type LocationFormProps = {
 };
 export default function LocationForm({ location }: LocationFormProps) {
   const [open, setOpen] = useState(false);
-  const  router = useRouter()
+  const router = useRouter();
   const form = useForm<z.infer<typeof LocationSchema>>({
     resolver: zodResolver(LocationSchema),
     defaultValues: location
@@ -60,20 +61,25 @@ export default function LocationForm({ location }: LocationFormProps) {
         },
   });
   async function onSubmit(data: z.infer<typeof LocationSchema>) {
-    if (location) {
-      const res = await setLocation(data, location.id);
-      if (res.success) {
-        setOpen(false);
-        form.reset()
-        router.refresh()
+    try {
+      if (location) {
+        const res = await setLocation(data, location.id);
+        if (res.success) {
+          setOpen(false);
+          form.reset();
+          router.refresh();
+        }
+      } else {
+        const res = await setLocation(data);
+        if (res.success) {
+          setOpen(false);
+          form.reset();
+          router.refresh();
+        }
       }
-    } else {
-      const res = await setLocation(data);
-      if (res.success) {
-        setOpen(false);
-        form.reset()
-        router.refresh()
-      }
+    } catch (error) {
+      toast.error("Unexpected error. Please refresh the page.");
+      router.refresh();
     }
   }
   return (
@@ -82,7 +88,8 @@ export default function LocationForm({ location }: LocationFormProps) {
         {location ? (
           <Button
             variant="ghost"
-            className="font-normal flex items-center justify-start w-full mx-0">
+            className="font-normal flex items-center justify-start w-full mx-0"
+          >
             Edit
           </Button>
         ) : (

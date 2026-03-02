@@ -84,8 +84,6 @@ export const config = {
         '/logout/:path*',
         '/admin/:path*',
         '/dashboard/:path*',
-        '/home',
-        '/',
         '/password-reset',
         '/password-reset-confirm/:path*',
     ]

@@ -64,8 +64,8 @@ class Product(models.Model):
     saler_location = models.ForeignKey(
         Location, related_name="location", on_delete=models.CASCADE
     )
-    saler_email = models.CharField(max_length=250)
-    saler_telegram_url = models.URLField(max_length=200)
+    saler_email = models.EmailField(max_length=254)
+    seller_telegram_username = models.CharField(max_length=200, null=True, blank=True)
     saler_phone = models.CharField(
         _("Saler Phone"), blank=True, null=True, max_length=50
     )
@@ -110,7 +110,8 @@ class ProductImage(models.Model):
     order = models.PositiveIntegerField(default=0)
     alt_text = models.TextField(_("Alt Text"))
     created_at = models.DateField(_("Created At"), auto_now_add=True)
-    updated_at = models.DateField(_("Created At"), auto_now =True)
+    updated_at = models.DateField(_("Created At"), auto_now=True)
+
     def __str__(self):
         return f"Image of {self.product.name}-{self.alt_text}"
 

@@ -15,9 +15,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "ET-Creative | Connect Products with Trusted Sellers",
+  title: "ET-Creative | ምርቶችን ከታማኝ ሻጮች ጋር ያገናኙ",
   description:
-    "ET-Creative is a marketplace platform where sellers showcase their products and clients browse listings while viewing detailed seller information.",
+    "ET-Creative ሻጮች ምርቶቻቸውን የሚያስተዋውቁበት እና ደንበኞች የሻጮችን ዝርዝር መረጃ እያዩ የሚገበያዩበት የገበያ ቦታ ነው።",
 };
 
 
