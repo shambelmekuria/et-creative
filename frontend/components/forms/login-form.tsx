@@ -47,7 +47,12 @@ export function LoginForm({
       setLogging(true);
       setError("");
       const response = await axios.post("api/auth/login", data);
-      router.replace(`${response.data.role}/dashboard`);
+      if(response.data.login === true && response.data.role === 'admin' && response.data.is_admin === true){
+        router.replace(`/admin/dashboard`);
+      }
+      else if(response.data.login === true && response.data.role === 'user' && response.data.is_user === true){
+        router.replace(`/`);
+      }
     } catch {
       setLogging(false);
       setError("Invalid Username or Password");

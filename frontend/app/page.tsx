@@ -7,11 +7,18 @@ import { DJANGO_BASE_URL } from "@/config/defualt";
 import CTA from "./(client)/about/cta";
 
 export default async function Home() {
-  const res = await axios.get(`${DJANGO_BASE_URL}/api/index`);
+  let data =null
+ try{
+   const res = await axios.get(`${DJANGO_BASE_URL}/api/index`);
+   data = res.data;
+ }
+ catch(error){
+    console.error("Error fetching data:", error);
+ }
   return (
     <div>
       <HeroSection />
-      <FeaturedProduct data={res.data} />
+      <FeaturedProduct data={data} />
       <FAQs />
       <CTA/>
       <Footer />

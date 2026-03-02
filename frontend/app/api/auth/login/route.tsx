@@ -9,6 +9,8 @@ const TOKEN_AGE = 3600;
 type DecodedValues = {
   username: string;
   fullname: string;
+  is_admin: boolean;
+  is_user: boolean;
   role: string;
 };
 
@@ -20,7 +22,17 @@ export async function POST(request: Request) {
     // decoded/translate token to readable format
     const decoded = jwtDecode<DecodedValues>(`${access}`);
     // Send access token to cookies browser storage
-    const res = NextResponse.json({fullname:decoded.fullname,username:decoded.username,role:decoded.role ,login: true }, { status: 200 });
+    const res = NextResponse.json(
+      {
+        fullname: decoded.fullname,
+        username: decoded.username,
+        role: decoded.role,
+        login: true,
+        is_admin: decoded.is_admin,
+        is_user: decoded.is_user,
+      },
+      { status: 200 },
+    );
     res.cookies.set({
       name: TOKEN_NAME,
       value: access,
