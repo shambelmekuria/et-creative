@@ -86,7 +86,7 @@ export default function FeaturedProduct({ data }: any) {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <p className="flex  gap-2 text-sm text-muted-foreground">
+                  <p className="flex items-center justify-start  gap-2  text-muted-foreground">
                     <MapPin size={16} />
                     {item.saler_location}
                   </p>

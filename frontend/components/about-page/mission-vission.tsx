@@ -53,6 +53,7 @@ export default function MissionVission() {
             </CardDescription>
           </CardHeader>
         </Card>
+
       </div>
     </section>
   );

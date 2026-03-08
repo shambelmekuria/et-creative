@@ -4,7 +4,7 @@ import FAQs from "@/components/index/faqs";
 import FeaturedProduct from "@/components/index/feature-product";
 import axios from "axios";
 import { DJANGO_BASE_URL } from "@/config/defualt";
-import CTA from "./(client)/about/cta";
+import CTA from "../components/about-page/cta";
 
 export default async function Home() {
   let data =null
