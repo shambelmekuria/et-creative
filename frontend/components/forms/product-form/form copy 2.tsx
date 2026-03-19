@@ -46,16 +46,10 @@ import ProductImageDisplay from "@/components/product/product-image-display";
 import { fetchCategories } from "@/actions/category";
 
 type FormValues = z.infer<typeof ProductFormSchema>;
-type RawCategory = {
-  id: string;
-  name: string;
-  slug?: string;
-};
 type ProductFormProps = {
   product?: Product;
   product_id?: string;
   images?: ProductImage[];
-  categories?:RawCategory[]
 };
 
 const steps = [
@@ -97,7 +91,11 @@ type RawLocation = {
   name: string;
   region?: string;
 };
-
+type RawCategory = {
+  id: string;
+  name: string;
+  slug?: string;
+};
 
 // Useful for filter for UI Components
 type LocationOption = {
@@ -114,9 +112,9 @@ export default function ProductFormMain({
   product,
   product_id,
   images,
-  categories
 }: ProductFormProps) {
   const [rawLocations, setRawLocations] = useState<RawLocation[]>([]);
+  const [rawCategory, setRawCategory] = useState<RawCategory[]>([]);
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(1);
   const [previousStep, setPreviousStep] = useState(1);
@@ -124,7 +122,9 @@ export default function ProductFormMain({
   const [salerLocationInputValue, setSalerLocationInputValue] = useState<
     string | undefined
   >("");
-  let categoryInputValue = null;
+  const [categoryInputValue, setCategoryInputValue] = useState<
+    string | undefined
+  >("");
   const delta = currentStep - previousStep;
 
   // Custom filter logic
@@ -132,8 +132,8 @@ export default function ProductFormMain({
   function onCategoryFilter(optionValues: string[], inputValue: string) {
     if (!inputValue) return optionValues;
     const search = inputValue.toLowerCase();
-    return categoriesChoice
-      ?.filter(
+    return categories
+      .filter(
         (item) =>
           optionValues.includes(item.value) &&
           item.label.toLowerCase().includes(search),
@@ -158,7 +158,7 @@ export default function ProductFormMain({
 
   const handleCategoriesFilter = (options: string[], search: string) => {
     // 1. Map the string values back to their full objects
-    const itemsToFilter = categoriesChoice?.filter((item) =>
+    const itemsToFilter = categories.filter((item) =>
       options.includes(item.value),
     );
     // 2. Use match-sorter (or .filter) to search specifically on the 'label' key
@@ -174,34 +174,42 @@ export default function ProductFormMain({
     setRawLocations(res);
   }
 
+  async function fetchCategoryChoice() {
+    const res = await fetchCategories();
+    setRawCategory(res);
+  }
+
   useEffect(() => {
+    fetchCategoryChoice();
     fetchLocationChoice();
+    
   }, []);
 
   const locations: LocationOption[] = rawLocations.map((item) => ({
     label: `${item?.name} - ${item?.region}`,
     value: String(item?.id),
   }));
-   const categoriesChoice: CategoryOption[] = categories.map((item) => ({
+
+  const categories: CategoryOption[] = rawCategory.map((item) => ({
     label: `${item?.name}`,
     value: String(item?.id),
   }));
 
-  const category = categoriesChoice.find((item) => item.value == product?.category);
-  categoryInputValue = category?.label
-
   useEffect(() => {
-    const location = locations.find(
-      (loc) => loc.value == product?.saler_location,
+     const category = categories.find(
+      (item) => item.value === product?.category,
     );
-
+    const location = locations.find(
+      (loc) => loc.value === product?.saler_location,
+    );
+     setCategoryInputValue(category?.label);
+    // Set Value For Update
     setSalerLocationInputValue(location?.label);
-  }, [product, locations]);
+  
+  }, [locations, categories]);
 
-  // useEffect(() => {
-  //   const category = categoriesChoice.find((item) => item.value == product?.category);
-  //   setCategoryInputValue(category?.label);
-  // }, [product, categories]);
+  // Set Location
+
   const form = useForm<FormValues>({
     resolver: zodResolver(ProductFormSchema),
     defaultValues: product
@@ -473,8 +481,48 @@ export default function ProductFormMain({
                             </Field>
                           )}
                         />
+
                         <Controller
                           name="category"
+                          control={form.control}
+                          render={({ field, fieldState }) => (
+                            <Field
+                              orientation="vertical"
+                              data-invalid={fieldState.invalid}
+                            >
+                              <FieldContent>
+                                <FieldLabel htmlFor="category">
+                                  Category
+                                </FieldLabel>
+                                {fieldState.invalid && (
+                                  <FieldError errors={[fieldState.error]} />
+                                )}
+                              </FieldContent>
+                              <Select
+                                name={field.name}
+                                value={field.value}
+                                onValueChange={field.onChange}
+                                defaultValue={categoryInputValue}
+                              >
+                                <SelectTrigger
+                                  id="category"
+                                  aria-invalid={fieldState.invalid}
+                                >
+                                  <SelectValue placeholder="Select" />
+                                </SelectTrigger>
+                                <SelectContent position="item-aligned">
+                                  {categories.map((item, index) => (
+                                    <SelectItem key={index} value={item.value}>
+                                      {item.label}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </Field>
+                          )}
+                        />
+                               <Controller
+                          name= "category"
                           control={form.control}
                           render={({ field, fieldState }) => (
                             <Field
@@ -485,22 +533,21 @@ export default function ProductFormMain({
                                 <FieldLabel htmlFor="form-category">
                                   Category
                                 </FieldLabel>
-                                <FieldDescription>
-                                  Lorem ipsum dolor sit.
-                                </FieldDescription>
                                 {fieldState.invalid && (
                                   <FieldError errors={[fieldState.error]} />
                                 )}
                               </FieldContent>
                               <Combobox.ComboboxRoot
-                                defaultValue={categoryInputValue}
+                                value={field.value}
                                 onValueChange={field.onChange}
-                                onFilter={handleCategoriesFilter}
+                                defaultValue={categoryInputValue}
+                                // onFilter={handleFilter}
+                                onFilter={handleFilter}
                               >
                                 <Combobox.ComboboxAnchor className="flex h-9 w-full items-center justify-between rounded-md border border-zinc-200 bg-white px-3 py-2 shadow-xs transition-colors data-focused:ring-1 data-focused:ring-zinc-800 dark:border-zinc-800 dark:bg-zinc-950 dark:data-focused:ring-zinc-300">
                                   <Combobox.ComboboxInput
-                                    id="form-category"
-                                    placeholder="Search Categorie..."
+                                  id="form-category"
+                                    placeholder="Search Location..."
                                     className="flex h-9 w-full rounded-md bg-transparent text-base text-zinc-900 placeholder:text-zinc-500 focus:outline-hidden disabled:cursor-not-allowed disabled:opacity-50 md:text-sm dark:text-zinc-50 dark:placeholder:text-zinc-400"
                                   />
                                   <Combobox.ComboboxTrigger className="flex shrink-0 items-center justify-center rounded-r-md border-zinc-200 bg-transparent text-zinc-500 transition-colors hover:text-zinc-900 focus-visible:outline-hidden disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-50">
@@ -512,7 +559,7 @@ export default function ProductFormMain({
                                     <Combobox.ComboboxEmpty className="py-6 text-center text-sm text-zinc-500 dark:text-zinc-400">
                                       No tricks found.
                                     </Combobox.ComboboxEmpty>
-                                    {categoriesChoice.map((item) => (
+                                    {categories.map((item) => (
                                       <Combobox.ComboboxItem
                                         key={item.value}
                                         value={item.value}

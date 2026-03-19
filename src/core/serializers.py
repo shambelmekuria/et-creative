@@ -25,6 +25,11 @@ class LocationSerializer(ModelSerializer):
 
 class ProductSerializer(ModelSerializer):
     owner = serializers.HiddenField(default=serializers.CurrentUserDefault())
+    category = serializers.PrimaryKeyRelatedField(
+        queryset=Category.objects.all(), write_only=True
+    )
+    category_detail = CategorySerializer(source="category", read_only=True)
+    
     saler_location = serializers.PrimaryKeyRelatedField(
         queryset=Location.objects.all(), write_only=True
     )
@@ -40,6 +45,8 @@ class ProductSerializer(ModelSerializer):
             "description",
             "price",
             "code",
+            "category",
+            "category_detail",
             "saler_name",
             "saler_location",
             "saler_location_detail",

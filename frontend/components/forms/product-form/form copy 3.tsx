@@ -46,16 +46,15 @@ import ProductImageDisplay from "@/components/product/product-image-display";
 import { fetchCategories } from "@/actions/category";
 
 type FormValues = z.infer<typeof ProductFormSchema>;
-type RawCategory = {
-  id: string;
-  name: string;
-  slug?: string;
-};
 type ProductFormProps = {
   product?: Product;
   product_id?: string;
   images?: ProductImage[];
-  categories?:RawCategory[]
+  categories?: {
+    id: string;
+    name: string;
+    slug?: string;
+  };
 };
 
 const steps = [
@@ -97,7 +96,11 @@ type RawLocation = {
   name: string;
   region?: string;
 };
-
+type RawCategory = {
+  id: string;
+  name: string;
+  slug?: string;
+};
 
 // Useful for filter for UI Components
 type LocationOption = {
@@ -114,9 +117,9 @@ export default function ProductFormMain({
   product,
   product_id,
   images,
-  categories
 }: ProductFormProps) {
   const [rawLocations, setRawLocations] = useState<RawLocation[]>([]);
+  const [rawCategory, setRawCategory] = useState<RawCategory[]>([]);
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(1);
   const [previousStep, setPreviousStep] = useState(1);
@@ -124,7 +127,9 @@ export default function ProductFormMain({
   const [salerLocationInputValue, setSalerLocationInputValue] = useState<
     string | undefined
   >("");
-  let categoryInputValue = null;
+  const [categoryInputValue, setCategoryInputValue] = useState<
+    string | undefined
+  >("");
   const delta = currentStep - previousStep;
 
   // Custom filter logic
@@ -132,8 +137,8 @@ export default function ProductFormMain({
   function onCategoryFilter(optionValues: string[], inputValue: string) {
     if (!inputValue) return optionValues;
     const search = inputValue.toLowerCase();
-    return categoriesChoice
-      ?.filter(
+    return categories
+      .filter(
         (item) =>
           optionValues.includes(item.value) &&
           item.label.toLowerCase().includes(search),
@@ -158,7 +163,7 @@ export default function ProductFormMain({
 
   const handleCategoriesFilter = (options: string[], search: string) => {
     // 1. Map the string values back to their full objects
-    const itemsToFilter = categoriesChoice?.filter((item) =>
+    const itemsToFilter = categories.filter((item) =>
       options.includes(item.value),
     );
     // 2. Use match-sorter (or .filter) to search specifically on the 'label' key
@@ -174,7 +179,13 @@ export default function ProductFormMain({
     setRawLocations(res);
   }
 
+  async function fetchCategoryChoice() {
+    const res = await fetchCategories();
+    setRawCategory(res);
+  }
+
   useEffect(() => {
+    fetchCategoryChoice();
     fetchLocationChoice();
   }, []);
 
@@ -182,13 +193,11 @@ export default function ProductFormMain({
     label: `${item?.name} - ${item?.region}`,
     value: String(item?.id),
   }));
-   const categoriesChoice: CategoryOption[] = categories.map((item) => ({
+
+  const categories: CategoryOption[] = rawCategory.map((item) => ({
     label: `${item?.name}`,
     value: String(item?.id),
   }));
-
-  const category = categoriesChoice.find((item) => item.value == product?.category);
-  categoryInputValue = category?.label
 
   useEffect(() => {
     const location = locations.find(
@@ -198,10 +207,10 @@ export default function ProductFormMain({
     setSalerLocationInputValue(location?.label);
   }, [product, locations]);
 
-  // useEffect(() => {
-  //   const category = categoriesChoice.find((item) => item.value == product?.category);
-  //   setCategoryInputValue(category?.label);
-  // }, [product, categories]);
+  useEffect(() => {
+    const category = categories.find((item) => item.value == product?.category);
+    setCategoryInputValue(category?.label);
+  }, [product, categories]);
   const form = useForm<FormValues>({
     resolver: zodResolver(ProductFormSchema),
     defaultValues: product
@@ -512,7 +521,7 @@ export default function ProductFormMain({
                                     <Combobox.ComboboxEmpty className="py-6 text-center text-sm text-zinc-500 dark:text-zinc-400">
                                       No tricks found.
                                     </Combobox.ComboboxEmpty>
-                                    {categoriesChoice.map((item) => (
+                                    {categories.map((item) => (
                                       <Combobox.ComboboxItem
                                         key={item.value}
                                         value={item.value}

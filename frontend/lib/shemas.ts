@@ -8,6 +8,7 @@ export const ProductFormSchema = z.object({
   // Seler Related
   saler_name: z.string().min(1, "Required"),
   saler_location: z.string().min(1, "Saler location is required"),
+  category: z.string().min(1, "Saler location is required"),
   saler_email: z.email(),
   seller_telegram_username: z.string().optional(),
   saler_phone: z

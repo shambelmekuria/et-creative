@@ -29,11 +29,12 @@ class LocationViewSet(ModelViewSet):
 class ProductViewSet(ModelViewSet):
     serializer_class = ProductSerializer
     permission_classes = [IsAuthenticated]
-    
+
     def update(self, request, *args, **kwargs):
-        print("Request...",request.data)
+        print("Request...", request.data)
         return super().update(request, *args, **kwargs)
     # Override get_queryset to filter products by the authenticated user
+
     def get_queryset(self):
         return Product.objects.filter(owner=self.request.user)
 
@@ -43,7 +44,7 @@ class ProductImageViewSet(ModelViewSet):
     serializer_class = ProductImageSerializer
     permission_classes = [IsAuthenticated]
     queryset = ProductImage.objects.all()
-    
+
     # def get_queryset(self):
     #     return ProductImage.objects.filter(product__owner=self.request.user)
 
@@ -77,7 +78,8 @@ def dashboard(request):
 
 @api_view(["GET"])
 def index(request):
-    recent_products = Product.objects.prefetch_related("images").filter(is_sold=False,status="approved")[:6]
+    recent_products = Product.objects.prefetch_related(
+        "images").filter(is_sold=False, status="approved")[:6]
     data = []
     for product in recent_products:
         first_image = product.images.filter(is_main=True).first()
@@ -88,9 +90,9 @@ def index(request):
                 "price": product.price,
                 "code": product.code,
                 "saler_name": product.saler_name,
-                "saler_phone":product.saler_phone,
-                "saler_telegram_username":product.seller_telegram_username,
-                "saler_email":product.saler_email,
+                "saler_phone": product.saler_phone,
+                "saler_telegram_username": product.seller_telegram_username,
+                "saler_email": product.saler_email,
                 "saler_location": f"{product.saler_location.name}-{product.saler_location.region}",
                 "featured_image": first_image.image.url if first_image else None,
                 "images": [img.image.url for img in product.images.all()],
@@ -98,5 +100,80 @@ def index(request):
         )
     return Response(
         {"recent_product": data},
+        status=status.HTTP_200_OK,
+    )
+
+
+@api_view(["GET"])
+def product_list(request):
+    products = Product.objects.prefetch_related(
+        "images").filter(is_sold=False, status="approved")
+    data = []
+    for product in products:
+        first_image = product.images.filter(is_main=True).first()
+        data.append(
+            {
+                "name": product.name,
+                "description": product.description,
+                "price": product.price,
+                "code": product.code,
+                "saler_name": product.saler_name,
+                "saler_phone": product.saler_phone,
+                "saler_telegram_username": product.seller_telegram_username,
+                "saler_email": product.saler_email,
+                "saler_location": f"{product.saler_location.name.upper()}-{product.saler_location.region.upper()}",
+                "featured_image": first_image.image.url if first_image else None,
+                "images": [img.image.url for img in product.images.all()],
+            }
+        )
+    return Response(
+        {"products": data},
+        status=status.HTTP_200_OK,
+    )
+
+
+@api_view(["GET"])
+def product_detail(request, pk):
+    try:
+        product = Product.objects.prefetch_related("images").get(pk=pk)
+        related_products = Product.objects.filter(
+            saler_location=product.saler_location,
+            is_sold=False,
+            status="approved"
+        ).exclude(pk=pk)[:4]
+    except Product.DoesNotExist:
+        return Response(
+            {"error": "Product not found"},
+            status=status.HTTP_404_NOT_FOUND,
+        )
+
+    first_image = product.images.filter(is_main=True).first()
+    data = {
+        "name": product.name,
+        "description": product.description,
+        "price": product.price,
+        "code": product.code,
+        "saler_name": product.saler_name,
+        "saler_phone": product.saler_phone,
+        "saler_telegram_username": product.seller_telegram_username,
+        "saler_email": product.saler_email,
+        "saler_location": f"{product.saler_location.name.upper()}-{product.saler_location.region.upper()}",
+        "featured_image": first_image.image.url if first_image else None,
+        "images": [img.image.url for img in product.images.all()],
+    }
+    related_products_list = []
+    for related in related_products:
+        first_image = related.images.filter(is_main=True).first()
+        related_products_list.append(
+            {
+                "name": related.name,
+                "description": related.description,
+                "price": related.price,
+                "saler_location": f"{related.saler_location.name.upper()}-{related.saler_location.region.upper()}",
+                "featured_image": first_image.image.url if first_image else None,
+            }
+        )
+    return Response(
+        {"product": data, "related_products": related_products_list},
         status=status.HTTP_200_OK,
     )

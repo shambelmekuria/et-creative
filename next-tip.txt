@@ -2,3 +2,18 @@ After delete use
  revalidatePath("/admin/location");
 
  for formData send it type must FormData not File or string or something
+
+ for floating point
+ product.price.toFixed(2)
+
+ filter tips
+<input
+  type="range"
+  min="0"
+  max="5000"
+  value={maxPrice}
+  onChange={(e) => setMaxPrice(Number(e.target.value))}
+/>
+ const filteredProducts = data.filter((p) => {
+  return p.category === category && p.price <= maxPrice
+})

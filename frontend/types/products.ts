@@ -6,7 +6,8 @@ export type Product = {
   code: string
   saler_name: string
   // saler_location: Location
-  saler_location: string
+  saler_location: string,
+  category:string,
   saler_email: string
   saler_phone: string
   seller_telegram_username?: string

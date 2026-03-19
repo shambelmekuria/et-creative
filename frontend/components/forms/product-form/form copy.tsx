@@ -46,16 +46,10 @@ import ProductImageDisplay from "@/components/product/product-image-display";
 import { fetchCategories } from "@/actions/category";
 
 type FormValues = z.infer<typeof ProductFormSchema>;
-type RawCategory = {
-  id: string;
-  name: string;
-  slug?: string;
-};
 type ProductFormProps = {
   product?: Product;
   product_id?: string;
   images?: ProductImage[];
-  categories?:RawCategory[]
 };
 
 const steps = [
@@ -91,18 +85,20 @@ const status = [
   { label: "Rejected", value: "rejected" },
 ] as const;
 
-// It Useful for comes from API Data for UPDate
 type RawLocation = {
   id: string;
   name: string;
   region?: string;
 };
-
-
-// Useful for filter for UI Components
 type LocationOption = {
   label: string;
   value: string;
+};
+
+type RawCategory = {
+  id: string;
+  name: string;
+  slug?: string;
 };
 
 type CategoryOption = {
@@ -114,17 +110,16 @@ export default function ProductFormMain({
   product,
   product_id,
   images,
-  categories
 }: ProductFormProps) {
   const [rawLocations, setRawLocations] = useState<RawLocation[]>([]);
+  const [rawCategory, setRawCategory] = useState<RawCategory[]>([]);
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(1);
   const [previousStep, setPreviousStep] = useState(1);
-  // Used to manage defualt Values
-  const [salerLocationInputValue, setSalerLocationInputValue] = useState<
+  const [salerLocationInputValue, setSalerLocationInputValue] = useState<string | undefined>(""); // For Update
+  const [categoryInputValue, setCategoryInputValue] = useState<
     string | undefined
   >("");
-  let categoryInputValue = null;
   const delta = currentStep - previousStep;
 
   // Custom filter logic
@@ -132,8 +127,8 @@ export default function ProductFormMain({
   function onCategoryFilter(optionValues: string[], inputValue: string) {
     if (!inputValue) return optionValues;
     const search = inputValue.toLowerCase();
-    return categoriesChoice
-      ?.filter(
+    return categories
+      .filter(
         (item) =>
           optionValues.includes(item.value) &&
           item.label.toLowerCase().includes(search),
@@ -156,89 +151,100 @@ export default function ProductFormMain({
     return filtered.map((item) => item.value);
   };
 
-  const handleCategoriesFilter = (options: string[], search: string) => {
-    // 1. Map the string values back to their full objects
-    const itemsToFilter = categoriesChoice?.filter((item) =>
-      options.includes(item.value),
+  const createFilter = (data: { label: string; value: string }[]) =>
+  (options: string[], search: string) => {
+    const items = data.filter((item) =>
+      options.includes(item.value)
     );
-    // 2. Use match-sorter (or .filter) to search specifically on the 'label' key
-    const filtered = matchSorter(itemsToFilter, search, {
+
+    return matchSorter(items, search, {
       keys: ["label"],
-      threshold: matchSorter.rankings.MATCHES,
-    });
-    // 3. Return the array of values (IDs) that matched
-    return filtered.map((item) => item.value);
+    }).map((item) => item.value);
   };
+
+
+
   async function fetchLocationChoice() {
     const res = await fetchLocation();
     setRawLocations(res);
   }
 
+  async function fetchCategoryChoice() {
+    const res = await fetchCategories();
+    setRawCategory(res);
+  }
+
   useEffect(() => {
     fetchLocationChoice();
+    fetchCategoryChoice();
   }, []);
 
   const locations: LocationOption[] = rawLocations.map((item) => ({
     label: `${item?.name} - ${item?.region}`,
     value: String(item?.id),
   }));
-   const categoriesChoice: CategoryOption[] = categories.map((item) => ({
+
+  const categories: CategoryOption[] = rawCategory.map((item) => ({
     label: `${item?.name}`,
     value: String(item?.id),
   }));
 
-  const category = categoriesChoice.find((item) => item.value == product?.category);
-  categoryInputValue = category?.label
+  const locationFilter = createFilter(locations);
+const categoryFilter = createFilter(categories);
 
   useEffect(() => {
     const location = locations.find(
-      (loc) => loc.value == product?.saler_location,
+      (loc) => loc.value === product?.saler_location,
     );
-
     setSalerLocationInputValue(location?.label);
   }, [product, locations]);
 
-  // useEffect(() => {
-  //   const category = categoriesChoice.find((item) => item.value == product?.category);
-  //   setCategoryInputValue(category?.label);
-  // }, [product, categories]);
+  // Set Category
+  useEffect(() => {
+    const category = categories.find((loc) => loc.value === product?.category);
+    setCategoryInputValue(category?.label);
+  }, [product, categories]);
+
+  // Set Location
+
   const form = useForm<FormValues>({
     resolver: zodResolver(ProductFormSchema),
     defaultValues: product
       ? {
-          // Product Related
-          name: product.name,
-          description: product.description,
-          code: product.code,
-          price: product.price,
-          category: product.category,
-          // Saler Related
-          saler_name: product.saler_name,
-          saler_location: product.saler_location,
-          saler_email: product.saler_email,
-          saler_phone: product.saler_phone,
-          seller_telegram_username: product.seller_telegram_username,
-          // Aditional Info and Status
-          status: product.status,
-          is_sold: product.is_sold,
-        }
+        // Product Related
+        name: product.name,
+        description: product.description,
+        code: product.code,
+        price: product.price,
+        category: product.category,
+        // Saler Related
+        saler_name: product.saler_name,
+        saler_location: product.saler_location,
+        saler_email: product.saler_email,
+        saler_phone: product.saler_phone,
+        seller_telegram_username: product.seller_telegram_username,
+        // Aditional Info and Status
+        status: product.status,
+        is_sold: product.is_sold,
+
+      }
       : {
-          // Product Related
-          name: "",
-          description: "",
-          code: "",
-          price: 0,
-          // Saler Related
-          saler_name: "",
-          saler_location: "",
-          saler_email: "",
-          saler_phone: "",
-          seller_telegram_username: "",
-          // Aditional Info and Status
-          status: "pending",
-          is_sold: false,
-          category: "",
-        },
+        // Product Related
+        name: "",
+        description: "",
+        code: "",
+        price: 0,
+        // Saler Related
+        saler_name: "",
+        saler_location: "",
+        saler_email: "",
+        saler_phone: "",
+        seller_telegram_username: "",
+        // Aditional Info and Status
+        status: "pending",
+        is_sold: false,
+        category: "",
+      },
   });
   type FieldName = keyof FormValues;
 
@@ -473,6 +479,7 @@ export default function ProductFormMain({
                             </Field>
                           )}
                         />
+
                         <Controller
                           name="category"
                           control={form.control}
@@ -482,25 +489,23 @@ export default function ProductFormMain({
                               data-invalid={fieldState.invalid}
                             >
                               <FieldContent>
-                                <FieldLabel htmlFor="form-category">
+                                <FieldLabel htmlFor="category">
                                   Category
                                 </FieldLabel>
-                                <FieldDescription>
-                                  Lorem ipsum dolor sit.
-                                </FieldDescription>
                                 {fieldState.invalid && (
                                   <FieldError errors={[fieldState.error]} />
                                 )}
                               </FieldContent>
                               <Combobox.ComboboxRoot
-                                defaultValue={categoryInputValue}
+                                value={field.value}
                                 onValueChange={field.onChange}
-                                onFilter={handleCategoriesFilter}
+                                defaultValue={categoryInputValue}
+                                // onFilter={handleFilter}
+                                onFilter={categoryFilter}
                               >
                                 <Combobox.ComboboxAnchor className="flex h-9 w-full items-center justify-between rounded-md border border-zinc-200 bg-white px-3 py-2 shadow-xs transition-colors data-focused:ring-1 data-focused:ring-zinc-800 dark:border-zinc-800 dark:bg-zinc-950 dark:data-focused:ring-zinc-300">
                                   <Combobox.ComboboxInput
-                                    id="form-category"
-                                    placeholder="Search Categorie..."
+                                    placeholder="Search Category..."
                                     className="flex h-9 w-full rounded-md bg-transparent text-base text-zinc-900 placeholder:text-zinc-500 focus:outline-hidden disabled:cursor-not-allowed disabled:opacity-50 md:text-sm dark:text-zinc-50 dark:placeholder:text-zinc-400"
                                   />
                                   <Combobox.ComboboxTrigger className="flex shrink-0 items-center justify-center rounded-r-md border-zinc-200 bg-transparent text-zinc-500 transition-colors hover:text-zinc-900 focus-visible:outline-hidden disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-50">
@@ -510,9 +515,9 @@ export default function ProductFormMain({
                                 <Combobox.ComboboxPortal>
                                   <Combobox.ComboboxContent className="data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 relative z-50 min-w-[var(--dice-anchor-width)] overflow-hidden rounded-md border border-zinc-200 bg-white p-1 text-zinc-950 shadow-md data-[state=closed]:animate-out data-[state=open]:animate-in dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50">
                                     <Combobox.ComboboxEmpty className="py-6 text-center text-sm text-zinc-500 dark:text-zinc-400">
-                                      No tricks found.
+                                      No Category found.
                                     </Combobox.ComboboxEmpty>
-                                    {categoriesChoice.map((item) => (
+                                    {categories.map((item) => (
                                       <Combobox.ComboboxItem
                                         key={item.value}
                                         value={item.value}

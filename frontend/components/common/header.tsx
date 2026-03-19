@@ -10,23 +10,15 @@ import { ModeToggle } from '../mode-toggle'
 
 const menuItems = [
     { name: 'መነሻ', href: '/' },
-    { name: 'ምርቶች', href: '#link' },
+    { name: 'ምርቶች', href: '/product' },
     { name: 'ስለ እኛ', href: '/about' },
     { name: 'ያግኙን', href: '/contact-us' },
-    { name: 'FAQs', href: '#link' },
+    { name: 'ጥያቄዎች', href: '/#faqs' },
 ]
 
 export const HeroHeader = () => {
     const [menuState, setMenuState] = React.useState(false)
-    const [isScrolled, setIsScrolled] = React.useState(false)
 
-    React.useEffect(() => {
-        const handleScroll = () => {
-            setIsScrolled(window.scrollY > 50)
-        }
-        window.addEventListener('scroll', handleScroll)
-        return () => window.removeEventListener('scroll', handleScroll)
-    }, [])
     return (
         <header>
             <nav

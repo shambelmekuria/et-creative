@@ -57,6 +57,7 @@ class Product(models.Model):
     description = models.TextField()
     price = models.DecimalField(max_digits=6, decimal_places=2)
     code = models.CharField(max_length=50)
+    category = models.ForeignKey(Category, on_delete=models.SET_NULL,null=True)
     # ------------------------------
     #         About Saler          |
     # ------------------------------
