@@ -40,13 +40,24 @@ export type FormInputFieldProps = {
   type: string;
   placeholder: string;
 };
+export type FormSelectFieldProps = {
+  control: any;
+  name: string;
+  label: string;
+  placeholder?: string;
+  description: string;
+  options:readonly {
+    value: string;
+    label: string;
+  }[];
+};
 
 export type ComboboxInputFieldProps = {
   control: any;
   name: string;
   label: string;
   placeholder?: string;
-  description?:string | null;
+  description?: string | null;
   Options: LocationOption[];
   defaultValue: string | undefined;
   onFilter: (options: string[], search: string) => any[];
