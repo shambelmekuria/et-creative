@@ -6,7 +6,7 @@ import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ProductFormSchema } from "@/lib/shemas";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import * as Combobox from "@diceui/combobox";
 import { Check, ChevronDown } from "lucide-react";
 import {

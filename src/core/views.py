@@ -29,12 +29,6 @@ class LocationViewSet(ModelViewSet):
 class ProductViewSet(ModelViewSet):
     serializer_class = ProductSerializer
     permission_classes = [IsAuthenticated]
-
-    def update(self, request, *args, **kwargs):
-        print("Request...", request.data)
-        return super().update(request, *args, **kwargs)
-    # Override get_queryset to filter products by the authenticated user
-
     def get_queryset(self):
         return Product.objects.filter(owner=self.request.user)
 
