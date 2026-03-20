@@ -11,8 +11,8 @@ export type ProductFormProps = {
   product?: Product;
   product_id?: string;
   images?: ProductImage[];
-  categories?:RawCategory[]
-  locations?:Location[]
+  categories?: RawCategory[];
+  locations?: Location[];
 };
 
 // It Useful for comes from API Data for UPDate
@@ -39,4 +39,15 @@ export type FormInputFieldProps = {
   label: string;
   type: string;
   placeholder: string;
+};
+
+export type ComboboxInputFieldProps = {
+  control: any;
+  name: string;
+  label: string;
+  placeholder?: string;
+  description?:string | null;
+  Options: LocationOption[];
+  defaultValue: string | undefined;
+  onFilter: (options: string[], search: string) => any[];
 };
