@@ -48,6 +48,7 @@ import { createFilter } from "@/utils/product-form/create-filter";
 
 import FormInputField from "./FormInputField";
 import StepProgress from "./step-progress";
+import ComboboxInputField from "./ComboboxInputField";
 
 type FormValues = z.infer<typeof ProductFormSchema>;
 type FieldName = keyof FormValues;
@@ -64,7 +65,6 @@ export default function ProductFormMain({
   categories,
   locations,
 }: ProductFormProps) {
-
   const form = useForm<FormValues>({
     resolver: zodResolver(ProductFormSchema),
     defaultValues: getDefaultValues(product),
@@ -261,67 +261,15 @@ export default function ProductFormMain({
                             </Field>
                           )}
                         />
-                        <Controller
+                        <ComboboxInputField
                           name="category"
                           control={form.control}
-                          render={({ field, fieldState }) => (
-                            <Field
-                              orientation="vertical"
-                              data-invalid={fieldState.invalid}
-                            >
-                              <FieldContent>
-                                <FieldLabel htmlFor="form-category">
-                                  Category
-                                </FieldLabel>
-                                <FieldDescription>
-                                  Lorem ipsum dolor sit.
-                                </FieldDescription>
-                                {fieldState.invalid && (
-                                  <FieldError errors={[fieldState.error]} />
-                                )}
-                              </FieldContent>
-                              <Combobox.ComboboxRoot
-                                value={field.value}
-                                defaultValue={categoryInputValue}
-                                onValueChange={field.onChange}
-                                onFilter={handleCategoriesFilter}
-                              >
-                                <Combobox.ComboboxAnchor className="flex h-9 w-full items-center justify-between rounded-md border border-zinc-200 bg-white px-3 py-2 shadow-xs transition-colors data-focused:ring-1 data-focused:ring-zinc-800 dark:border-zinc-800 dark:bg-zinc-950 dark:data-focused:ring-zinc-300">
-                                  <Combobox.ComboboxInput
-                                    id="form-category"
-                                    placeholder="Search Categorie..."
-                                    className="flex h-9 w-full rounded-md bg-transparent text-base text-zinc-900 placeholder:text-zinc-500 focus:outline-hidden disabled:cursor-not-allowed disabled:opacity-50 md:text-sm dark:text-zinc-50 dark:placeholder:text-zinc-400"
-                                  />
-                                  <Combobox.ComboboxTrigger className="flex shrink-0 items-center justify-center rounded-r-md border-zinc-200 bg-transparent text-zinc-500 transition-colors hover:text-zinc-900 focus-visible:outline-hidden disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-50">
-                                    <ChevronDown className="h-4 w-4" />
-                                  </Combobox.ComboboxTrigger>
-                                </Combobox.ComboboxAnchor>
-                                <Combobox.ComboboxPortal>
-                                  <Combobox.ComboboxContent className="data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 relative z-50 min-w-[var(--dice-anchor-width)] overflow-hidden rounded-md border border-zinc-200 bg-white p-1 text-zinc-950 shadow-md data-[state=closed]:animate-out data-[state=open]:animate-in dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50">
-                                    <Combobox.ComboboxEmpty className="py-6 text-center text-sm text-zinc-500 dark:text-zinc-400">
-                                      No tricks found.
-                                    </Combobox.ComboboxEmpty>
-                                    {categoriesOption.map((item) => (
-                                      <Combobox.ComboboxItem
-                                        key={item.value}
-                                        value={item.value}
-                                        className="relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pr-2 pl-8 text-sm outline-hidden data-disabled:pointer-events-none data-highlighted:bg-zinc-100 data-highlighted:text-zinc-900 data-disabled:opacity-50 dark:data-highlighted:bg-zinc-800 dark:data-highlighted:text-zinc-50"
-                                      >
-                                        <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
-                                          <Combobox.ComboboxItemIndicator>
-                                            <Check className="h-4 w-4" />
-                                          </Combobox.ComboboxItemIndicator>
-                                        </span>
-                                        <Combobox.ComboboxItemText>
-                                          {item.label}
-                                        </Combobox.ComboboxItemText>
-                                      </Combobox.ComboboxItem>
-                                    ))}
-                                  </Combobox.ComboboxContent>
-                                </Combobox.ComboboxPortal>
-                              </Combobox.ComboboxRoot>
-                            </Field>
-                          )}
+                          label="Category"
+                          placeholder="Search Categorie..."
+                          description="Lorem ipsum dolor sit."
+                          defaultValue={categoryInputValue}
+                          onFilter={handleCategoriesFilter}
+                          Options={categoriesOption}
                         />
                       </div>
 
@@ -390,62 +338,14 @@ export default function ProductFormMain({
                           type="text"
                           control={form.control}
                         />
-                        <Controller
+                        <ComboboxInputField
                           name="saler_location"
                           control={form.control}
-                          render={({ field, fieldState }) => (
-                            <Field
-                              orientation="vertical"
-                              data-invalid={fieldState.invalid}
-                            >
-                              <FieldContent>
-                                <FieldLabel htmlFor="saler_location">
-                                  Saler Location
-                                </FieldLabel>
-                                {fieldState.invalid && (
-                                  <FieldError errors={[fieldState.error]} />
-                                )}
-                              </FieldContent>
-                              <Combobox.ComboboxRoot
-                                defaultValue={salerLocationInputValue}
-                                onValueChange={field.onChange}
-                                onFilter={handleLocationFilter}
-                              >
-                                <Combobox.ComboboxAnchor className="flex h-9 w-full items-center justify-between rounded-md border border-zinc-200 bg-white px-3 py-2 shadow-xs transition-colors data-focused:ring-1 data-focused:ring-zinc-800 dark:border-zinc-800 dark:bg-zinc-950 dark:data-focused:ring-zinc-300">
-                                  <Combobox.ComboboxInput
-                                    placeholder="Search Location..."
-                                    className="flex h-9 w-full rounded-md bg-transparent text-base text-zinc-900 placeholder:text-zinc-500 focus:outline-hidden disabled:cursor-not-allowed disabled:opacity-50 md:text-sm dark:text-zinc-50 dark:placeholder:text-zinc-400"
-                                  />
-                                  <Combobox.ComboboxTrigger className="flex shrink-0 items-center justify-center rounded-r-md border-zinc-200 bg-transparent text-zinc-500 transition-colors hover:text-zinc-900 focus-visible:outline-hidden disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-50">
-                                    <ChevronDown className="h-4 w-4" />
-                                  </Combobox.ComboboxTrigger>
-                                </Combobox.ComboboxAnchor>
-                                <Combobox.ComboboxPortal>
-                                  <Combobox.ComboboxContent className="data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 relative z-50 min-w-[var(--dice-anchor-width)] overflow-hidden rounded-md border border-zinc-200 bg-white p-1 text-zinc-950 shadow-md data-[state=closed]:animate-out data-[state=open]:animate-in dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50">
-                                    <Combobox.ComboboxEmpty className="py-6 text-center text-sm text-zinc-500 dark:text-zinc-400">
-                                      No tricks found.
-                                    </Combobox.ComboboxEmpty>
-                                    {locationsOption.map((location) => (
-                                      <Combobox.ComboboxItem
-                                        key={location.value}
-                                        value={location.value}
-                                        className="relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pr-2 pl-8 text-sm outline-hidden data-disabled:pointer-events-none data-highlighted:bg-zinc-100 data-highlighted:text-zinc-900 data-disabled:opacity-50 dark:data-highlighted:bg-zinc-800 dark:data-highlighted:text-zinc-50"
-                                      >
-                                        <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
-                                          <Combobox.ComboboxItemIndicator>
-                                            <Check className="h-4 w-4" />
-                                          </Combobox.ComboboxItemIndicator>
-                                        </span>
-                                        <Combobox.ComboboxItemText>
-                                          {location.label}
-                                        </Combobox.ComboboxItemText>
-                                      </Combobox.ComboboxItem>
-                                    ))}
-                                  </Combobox.ComboboxContent>
-                                </Combobox.ComboboxPortal>
-                              </Combobox.ComboboxRoot>
-                            </Field>
-                          )}
+                          label="Saler Location"
+                          placeholder="Search Saler Location..."
+                          defaultValue={salerLocationInputValue}
+                          onFilter={handleLocationFilter}
+                          Options={locationsOption}
                         />
                       </div>
                     </FieldGroup>
