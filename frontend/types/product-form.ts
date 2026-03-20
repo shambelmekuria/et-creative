@@ -37,7 +37,7 @@ export type FormInputFieldProps = {
   control: any;
   name: string;
   label: string;
-  type: string;
+  type: "text" | "number";
   placeholder: string;
 };
 export type FormSelectFieldProps = {

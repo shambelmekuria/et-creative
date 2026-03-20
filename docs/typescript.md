@@ -3,3 +3,6 @@
     value: string;
     label: string;
   }[];
+
+  # For Function Props in ts argument and response
+   onFilter: (options: string[], search: string) => any[];

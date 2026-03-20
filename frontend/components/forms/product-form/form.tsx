@@ -171,27 +171,12 @@ export default function ProductFormMain({
                           type="text"
                           control={form.control}
                         />
-
-                        <Controller
+                        <FormInputField
                           name="price"
+                          label="Price"
+                          placeholder="Enter Price"
+                          type="number"
                           control={form.control}
-                          render={({ field, fieldState }) => (
-                            <Field data-invalid={fieldState.invalid}>
-                              <FieldLabel>Price</FieldLabel>
-                              <Input
-                                type="number"
-                                {...field}
-                                onChange={(e) => {
-                                  const v = e.target.valueAsNumber;
-                                  field.onChange(isNaN(v) ? 0 : v);
-                                }}
-                                aria-invalid={fieldState.invalid}
-                              />
-                              {fieldState.invalid && (
-                                <FieldError errors={[fieldState.error]} />
-                              )}
-                            </Field>
-                          )}
                         />
                         <Controller
                           name="is_sold"
@@ -224,48 +209,6 @@ export default function ProductFormMain({
                           description="Choose the product’s approval status."
                           placeholder="Select Status"
                           options={status}
-                        />
-                        <Controller
-                          name="status"
-                          control={form.control}
-                          render={({ field, fieldState }) => (
-                            <Field
-                              orientation="vertical"
-                              data-invalid={fieldState.invalid}
-                            >
-                              <FieldContent>
-                                <FieldLabel htmlFor="status">Status</FieldLabel>
-                                <FieldDescription>
-                                  Choose the product’s approval status.
-                                </FieldDescription>
-                                {fieldState.invalid && (
-                                  <FieldError errors={[fieldState.error]} />
-                                )}
-                              </FieldContent>
-                              <Select
-                                onValueChange={field.onChange}
-                                value={field.value}
-                              >
-                                <SelectTrigger
-                                  id="status"
-                                  aria-invalid={fieldState.invalid}
-                                >
-                                  <SelectValue placeholder="Select" />
-                                </SelectTrigger>
-                                <SelectContent position="item-aligned">
-                                  <SelectSeparator />
-                                  {status.map((status) => (
-                                    <SelectItem
-                                      key={status.value}
-                                      value={status.value}
-                                    >
-                                      {status.label}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            </Field>
-                          )}
                         />
                         <ComboboxInputField
                           name="category"

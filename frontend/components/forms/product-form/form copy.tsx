@@ -1,0 +1,484 @@
+"use client";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Controller, SubmitHandler, useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { ProductFormSchema } from "@/lib/shemas";
+import { useEffect, useState } from "react";
+import * as Combobox from "@diceui/combobox";
+import { Check, ChevronDown } from "lucide-react";
+import {
+  Field,
+  FieldContent,
+  FieldDescription,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+  FieldTitle,
+} from "@/components/ui/field";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectSeparator,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupText,
+  InputGroupTextarea,
+} from "@/components/ui/input-group";
+import { motion } from "framer-motion";
+import { Checkbox } from "@/components/ui/checkbox";
+import { useRouter } from "next/navigation";
+import { setProduct } from "@/actions/product";
+import ProductImageForm from "../product-image/form";
+import ProductImageDisplay from "@/components/product/product-image-display";
+import { ProductFormProps, RawLocation } from "../../../types/product-form";
+import useCategoryOption from "@/hooks/use-category-option";
+import useLocationOption from "@/hooks/use-location-option";
+import { steps } from "@/utils/product-form/form-step";
+import { getDefaultValues } from "@/utils/product-form/get-defualt-values";
+import { createFilter } from "@/utils/product-form/create-filter";
+
+import FormInputField from "./FormInputField";
+import StepProgress from "./step-progress";
+
+type FormValues = z.infer<typeof ProductFormSchema>;
+type FieldName = keyof FormValues;
+
+const status = [
+  { label: "Approved", value: "approved" },
+  { label: "Pending", value: "pending" },
+  { label: "Rejected", value: "rejected" },
+] as const;
+export default function ProductFormMain({
+  product,
+  product_id,
+  images,
+  categories,
+  locations,
+}: ProductFormProps) {
+
+  const form = useForm<FormValues>({
+    resolver: zodResolver(ProductFormSchema),
+    defaultValues: getDefaultValues(product),
+  });
+  // Used to manage defualt Values for update
+  let salerLocationInputValue = null;
+  let categoryInputValue = null;
+  const { categoriesOption } = useCategoryOption(categories ?? []);
+  const { locationsOption } = useLocationOption(locations ?? []);
+  const router = useRouter();
+  const [currentStep, setCurrentStep] = useState(1);
+  const [previousStep, setPreviousStep] = useState(1);
+  const delta = currentStep - previousStep;
+  const category = categoriesOption.find(
+    (item) => item.value == product?.category,
+  );
+  categoryInputValue = category?.label;
+  const location = locationsOption.find(
+    (item) => item.value == product?.saler_location,
+  );
+  salerLocationInputValue = location?.label;
+
+  const handleLocationFilter = createFilter(locationsOption);
+  const handleCategoriesFilter = createFilter(categoriesOption);
+  const onSubmit: SubmitHandler<FormValues> = async (data) => {
+    try {
+      if (product_id) {
+        const res = await setProduct(data, product_id);
+        toast.success("Product updated successfully");
+      } else {
+        const res = await setProduct(data);
+        toast.success("Product saved successfully");
+      }
+
+      router.push("/admin/products");
+    } catch (error) {
+      toast.error("Unexpected error. Please refresh the page.");
+      router.refresh();
+    }
+  };
+
+  const next = async () => {
+    const fields = steps[currentStep - 1].fields;
+    const output = await form.trigger(fields as FieldName[], {
+      shouldFocus: true,
+    });
+
+    if (!output) return;
+
+    if (currentStep <= steps.length) {
+      if (currentStep === steps.length) {
+        await form.handleSubmit(onSubmit)();
+        return;
+      }
+      setPreviousStep(currentStep);
+      setCurrentStep((step) => step + 1);
+    }
+  };
+
+  const prev = () => {
+    if (currentStep > 1) {
+      setPreviousStep(currentStep);
+      setCurrentStep((step) => step - 1);
+    }
+  };
+
+  return (
+    <>
+      <div>
+        <Tabs defaultValue="products">
+          <TabsList>
+            <TabsTrigger value="products">Product</TabsTrigger>
+            {product && (
+              <TabsTrigger value="gallery">Add Product Gallery</TabsTrigger>
+            )}
+          </TabsList>
+          <TabsContent value="products">
+            <div className="space-y-3 mb-3 p-4">
+              <h1 className="font-medium text-xl">Add Product</h1>
+              <p className="text-muted-foreground text-sm">
+                Lorem ipsum dolor sit amet consectetur adipisicing.
+              </p>
+            </div>
+            <div className="flex flex-col justify-between w-full md:max-w-3xl gap-3">
+              <StepProgress currentStep={currentStep} />
+              <form className="mt-3 w-full">
+                {currentStep == 1 && (
+                  <motion.div
+                    initial={{ x: delta >= 0 ? "50%" : "-50%", opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    transition={{ duration: 0.3, ease: "easeInOut" }}
+                  >
+                    <FieldGroup>
+                      <div className="grid  grid-cols-1 md:grid-cols-2 gap-3">
+                        <FormInputField
+                          name="name"
+                          label="Product Name"
+                          placeholder="Enter Product Name"
+                          type="text"
+                          control={form.control}
+                        />
+                        <FormInputField
+                          name="code"
+                          label="Code"
+                          placeholder="Enter Code"
+                          type="text"
+                          control={form.control}
+                        />
+
+                        <Controller
+                          name="price"
+                          control={form.control}
+                          render={({ field, fieldState }) => (
+                            <Field data-invalid={fieldState.invalid}>
+                              <FieldLabel>Price</FieldLabel>
+                              <Input
+                                type="number"
+                                {...field}
+                                onChange={(e) => {
+                                  const v = e.target.valueAsNumber;
+                                  field.onChange(isNaN(v) ? 0 : v);
+                                }}
+                                aria-invalid={fieldState.invalid}
+                              />
+                              {fieldState.invalid && (
+                                <FieldError errors={[fieldState.error]} />
+                              )}
+                            </Field>
+                          )}
+                        />
+                        <Controller
+                          name="is_sold"
+                          control={form.control}
+                          render={({ field, fieldState }) => (
+                            <FieldLabel>
+                              <Field orientation="horizontal">
+                                <Checkbox
+                                  id="is_sold"
+                                  checked={field.value}
+                                  onCheckedChange={(value) =>
+                                    field.onChange(!!value)
+                                  }
+                                />
+                                <FieldContent>
+                                  <FieldTitle>Product Sold</FieldTitle>
+                                  <FieldDescription>
+                                    Mark this if the product has already been
+                                    sold.
+                                  </FieldDescription>
+                                </FieldContent>
+                              </Field>
+                            </FieldLabel>
+                          )}
+                        />
+                        <Controller
+                          name="status"
+                          control={form.control}
+                          render={({ field, fieldState }) => (
+                            <Field
+                              orientation="vertical"
+                              data-invalid={fieldState.invalid}
+                            >
+                              <FieldContent>
+                                <FieldLabel htmlFor="status">Status</FieldLabel>
+                                <FieldDescription>
+                                  Choose the product’s approval status.
+                                </FieldDescription>
+                                {fieldState.invalid && (
+                                  <FieldError errors={[fieldState.error]} />
+                                )}
+                              </FieldContent>
+                              <Select
+                                onValueChange={field.onChange}
+                                value={field.value}
+                              >
+                                <SelectTrigger
+                                  id="status"
+                                  aria-invalid={fieldState.invalid}
+                                >
+                                  <SelectValue placeholder="Select" />
+                                </SelectTrigger>
+                                <SelectContent position="item-aligned">
+                                  <SelectSeparator />
+                                  {status.map((status) => (
+                                    <SelectItem
+                                      key={status.value}
+                                      value={status.value}
+                                    >
+                                      {status.label}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </Field>
+                          )}
+                        />
+                        <Controller
+                          name="category"
+                          control={form.control}
+                          render={({ field, fieldState }) => (
+                            <Field
+                              orientation="vertical"
+                              data-invalid={fieldState.invalid}
+                            >
+                              <FieldContent>
+                                <FieldLabel htmlFor="form-category">
+                                  Category
+                                </FieldLabel>
+                                <FieldDescription>
+                                  Lorem ipsum dolor sit.
+                                </FieldDescription>
+                                {fieldState.invalid && (
+                                  <FieldError errors={[fieldState.error]} />
+                                )}
+                              </FieldContent>
+                              <Combobox.ComboboxRoot
+                                value={field.value}
+                                defaultValue={categoryInputValue}
+                                onValueChange={field.onChange}
+                                onFilter={handleCategoriesFilter}
+                              >
+                                <Combobox.ComboboxAnchor className="flex h-9 w-full items-center justify-between rounded-md border border-zinc-200 bg-white px-3 py-2 shadow-xs transition-colors data-focused:ring-1 data-focused:ring-zinc-800 dark:border-zinc-800 dark:bg-zinc-950 dark:data-focused:ring-zinc-300">
+                                  <Combobox.ComboboxInput
+                                    id="form-category"
+                                    placeholder="Search Categorie..."
+                                    className="flex h-9 w-full rounded-md bg-transparent text-base text-zinc-900 placeholder:text-zinc-500 focus:outline-hidden disabled:cursor-not-allowed disabled:opacity-50 md:text-sm dark:text-zinc-50 dark:placeholder:text-zinc-400"
+                                  />
+                                  <Combobox.ComboboxTrigger className="flex shrink-0 items-center justify-center rounded-r-md border-zinc-200 bg-transparent text-zinc-500 transition-colors hover:text-zinc-900 focus-visible:outline-hidden disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-50">
+                                    <ChevronDown className="h-4 w-4" />
+                                  </Combobox.ComboboxTrigger>
+                                </Combobox.ComboboxAnchor>
+                                <Combobox.ComboboxPortal>
+                                  <Combobox.ComboboxContent className="data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 relative z-50 min-w-[var(--dice-anchor-width)] overflow-hidden rounded-md border border-zinc-200 bg-white p-1 text-zinc-950 shadow-md data-[state=closed]:animate-out data-[state=open]:animate-in dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50">
+                                    <Combobox.ComboboxEmpty className="py-6 text-center text-sm text-zinc-500 dark:text-zinc-400">
+                                      No tricks found.
+                                    </Combobox.ComboboxEmpty>
+                                    {categoriesOption.map((item) => (
+                                      <Combobox.ComboboxItem
+                                        key={item.value}
+                                        value={item.value}
+                                        className="relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pr-2 pl-8 text-sm outline-hidden data-disabled:pointer-events-none data-highlighted:bg-zinc-100 data-highlighted:text-zinc-900 data-disabled:opacity-50 dark:data-highlighted:bg-zinc-800 dark:data-highlighted:text-zinc-50"
+                                      >
+                                        <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
+                                          <Combobox.ComboboxItemIndicator>
+                                            <Check className="h-4 w-4" />
+                                          </Combobox.ComboboxItemIndicator>
+                                        </span>
+                                        <Combobox.ComboboxItemText>
+                                          {item.label}
+                                        </Combobox.ComboboxItemText>
+                                      </Combobox.ComboboxItem>
+                                    ))}
+                                  </Combobox.ComboboxContent>
+                                </Combobox.ComboboxPortal>
+                              </Combobox.ComboboxRoot>
+                            </Field>
+                          )}
+                        />
+                      </div>
+
+                      <Controller
+                        name="description"
+                        control={form.control}
+                        render={({ field, fieldState }) => (
+                          <Field data-invalid={fieldState.invalid}>
+                            <FieldLabel>Description</FieldLabel>
+
+                            <InputGroup>
+                              <InputGroupTextarea
+                                {...field}
+                                rows={5}
+                                aria-invalid={fieldState.invalid}
+                              />
+                              <InputGroupAddon align="block-end">
+                                <InputGroupText>
+                                  {field.value?.length ?? 0}/100
+                                </InputGroupText>
+                              </InputGroupAddon>
+                            </InputGroup>
+
+                            {fieldState.invalid && (
+                              <FieldError errors={[fieldState.error]} />
+                            )}
+                          </Field>
+                        )}
+                      />
+                    </FieldGroup>
+                  </motion.div>
+                )}
+                {currentStep == 2 && (
+                  <motion.div
+                    initial={{ x: delta >= 0 ? "50%" : "-50%", opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    transition={{ duration: 0.3, ease: "easeInOut" }}
+                  >
+                    <FieldGroup>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <FormInputField
+                          name="saler_name"
+                          label="Saler Name"
+                          placeholder="Enter Saler Name"
+                          type="text"
+                          control={form.control}
+                        />
+                        <FormInputField
+                          name="saler_email"
+                          label="Saler Email"
+                          placeholder="Enter Saler Email"
+                          type="text"
+                          control={form.control}
+                        />
+                        <FormInputField
+                          name="saler_phone"
+                          label="Saler Phone"
+                          placeholder="Enter Saler Phone"
+                          type="text"
+                          control={form.control}
+                        />
+                        <FormInputField
+                          name="seller_telegram_username"
+                          label="Telegram Username"
+                          placeholder="Enter Telegram Username"
+                          type="text"
+                          control={form.control}
+                        />
+                        <Controller
+                          name="saler_location"
+                          control={form.control}
+                          render={({ field, fieldState }) => (
+                            <Field
+                              orientation="vertical"
+                              data-invalid={fieldState.invalid}
+                            >
+                              <FieldContent>
+                                <FieldLabel htmlFor="saler_location">
+                                  Saler Location
+                                </FieldLabel>
+                                {fieldState.invalid && (
+                                  <FieldError errors={[fieldState.error]} />
+                                )}
+                              </FieldContent>
+                              <Combobox.ComboboxRoot
+                                defaultValue={salerLocationInputValue}
+                                onValueChange={field.onChange}
+                                onFilter={handleLocationFilter}
+                              >
+                                <Combobox.ComboboxAnchor className="flex h-9 w-full items-center justify-between rounded-md border border-zinc-200 bg-white px-3 py-2 shadow-xs transition-colors data-focused:ring-1 data-focused:ring-zinc-800 dark:border-zinc-800 dark:bg-zinc-950 dark:data-focused:ring-zinc-300">
+                                  <Combobox.ComboboxInput
+                                    placeholder="Search Location..."
+                                    className="flex h-9 w-full rounded-md bg-transparent text-base text-zinc-900 placeholder:text-zinc-500 focus:outline-hidden disabled:cursor-not-allowed disabled:opacity-50 md:text-sm dark:text-zinc-50 dark:placeholder:text-zinc-400"
+                                  />
+                                  <Combobox.ComboboxTrigger className="flex shrink-0 items-center justify-center rounded-r-md border-zinc-200 bg-transparent text-zinc-500 transition-colors hover:text-zinc-900 focus-visible:outline-hidden disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-50">
+                                    <ChevronDown className="h-4 w-4" />
+                                  </Combobox.ComboboxTrigger>
+                                </Combobox.ComboboxAnchor>
+                                <Combobox.ComboboxPortal>
+                                  <Combobox.ComboboxContent className="data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 relative z-50 min-w-[var(--dice-anchor-width)] overflow-hidden rounded-md border border-zinc-200 bg-white p-1 text-zinc-950 shadow-md data-[state=closed]:animate-out data-[state=open]:animate-in dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50">
+                                    <Combobox.ComboboxEmpty className="py-6 text-center text-sm text-zinc-500 dark:text-zinc-400">
+                                      No tricks found.
+                                    </Combobox.ComboboxEmpty>
+                                    {locationsOption.map((location) => (
+                                      <Combobox.ComboboxItem
+                                        key={location.value}
+                                        value={location.value}
+                                        className="relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pr-2 pl-8 text-sm outline-hidden data-disabled:pointer-events-none data-highlighted:bg-zinc-100 data-highlighted:text-zinc-900 data-disabled:opacity-50 dark:data-highlighted:bg-zinc-800 dark:data-highlighted:text-zinc-50"
+                                      >
+                                        <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
+                                          <Combobox.ComboboxItemIndicator>
+                                            <Check className="h-4 w-4" />
+                                          </Combobox.ComboboxItemIndicator>
+                                        </span>
+                                        <Combobox.ComboboxItemText>
+                                          {location.label}
+                                        </Combobox.ComboboxItemText>
+                                      </Combobox.ComboboxItem>
+                                    ))}
+                                  </Combobox.ComboboxContent>
+                                </Combobox.ComboboxPortal>
+                              </Combobox.ComboboxRoot>
+                            </Field>
+                          )}
+                        />
+                      </div>
+                    </FieldGroup>
+                  </motion.div>
+                )}
+                <div className="mt-8 flex justify-between gap-3">
+                  <Button
+                    type="button"
+                    disabled={currentStep === 1}
+                    onClick={prev}
+                  >
+                    Previous
+                  </Button>
+                  <Button type="button" onClick={next}>
+                    {currentStep == steps.length ? "Save" : "Next"}
+                  </Button>
+                </div>
+              </form>
+            </div>
+          </TabsContent>
+          <TabsContent value="gallery" id="gallery">
+            <div className="px-4 mt-4">
+              <h1 className="text-xl font-bold">Gallery</h1>
+              <p className="text-muted-foreground mb-4">
+                Lorem ipsum dolor sit amet consectetur, adipisicing elit.
+                Tempore, sint.
+              </p>
+              {images && <ProductImageDisplay images={images} />}
+              <ProductImageForm product_id={product_id} mode="create" />
+            </div>
+          </TabsContent>
+        </Tabs>
+      </div>
+    </>
+  );
+}

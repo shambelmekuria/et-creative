@@ -17,12 +17,26 @@ export default function FormInputField({
         render={({ field, fieldState }) => (
           <Field data-invalid={fieldState.invalid}>
             <FieldLabel>{label}</FieldLabel>
-            <Input
-              {...field}
-              aria-invalid={fieldState.invalid}
-              type={type}
-              placeholder={placeholder}
-            />
+            {type === "text" ? (
+              <Input
+                {...field}
+                aria-invalid={fieldState.invalid}
+                type={type}
+                placeholder={placeholder}
+              />
+            ) : (
+              <Input
+                {...field}
+                aria-invalid={fieldState.invalid}
+                type={type}
+                onChange={(e) => {
+                  const v = e.target.valueAsNumber;
+                  field.onChange(isNaN(v) ? 0 : v);
+                }}
+                placeholder={placeholder}
+              />
+            )}
+
             {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
           </Field>
         )}
