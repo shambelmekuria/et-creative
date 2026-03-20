@@ -7,8 +7,6 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ProductFormSchema } from "@/lib/shemas";
 import { useEffect, useState } from "react";
-import * as Combobox from "@diceui/combobox";
-import { Check, ChevronDown } from "lucide-react";
 import {
   Field,
   FieldContent,
@@ -45,10 +43,10 @@ import useLocationOption from "@/hooks/use-location-option";
 import { steps } from "@/utils/product-form/form-step";
 import { getDefaultValues } from "@/utils/product-form/get-defualt-values";
 import { createFilter } from "@/utils/product-form/create-filter";
-
 import FormInputField from "./FormInputField";
 import StepProgress from "./step-progress";
 import ComboboxInputField from "./ComboboxInputField";
+import FormSelectField from "./FormSelectField";
 
 type FormValues = z.infer<typeof ProductFormSchema>;
 type FieldName = keyof FormValues;
@@ -218,6 +216,14 @@ export default function ProductFormMain({
                               </Field>
                             </FieldLabel>
                           )}
+                        />
+                        <FormSelectField
+                          name="status"
+                          control={form.control}
+                          label="Status"
+                          description="Choose the product’s approval status."
+                          placeholder="Select Status"
+                          options={status}
                         />
                         <Controller
                           name="status"
