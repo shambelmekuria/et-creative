@@ -6,7 +6,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Product } from "@/types/products";
 import { ProductFormSchema } from "@/lib/shemas";
 import { useEffect, useState } from "react";
 import * as Combobox from "@diceui/combobox";
@@ -37,109 +36,57 @@ import {
 } from "@/components/ui/input-group";
 import { motion } from "framer-motion";
 import { Checkbox } from "@/components/ui/checkbox";
-import { fetchLocation } from "@/actions/location";
 import { useRouter } from "next/navigation";
 import { setProduct } from "@/actions/product";
-import ProductImageForm from "../product-image/form";
-import { ProductImage, ProductImageResponse } from "@/types/product-image";
+import ProductImageForm from "../frontend/components/forms/product-image/form";
 import ProductImageDisplay from "@/components/product/product-image-display";
-import { fetchCategories } from "@/actions/category";
+import { ProductFormProps, RawLocation } from "../frontend/types/product-form";
+import useCategoryOption from "@/hooks/use-category-option";
+import useLocationOption from "@/hooks/use-location-option";
+import { steps } from "../frontend/utils/product-form/form-step";
+import { getDefaultValues } from "../frontend/utils/product-form/get-defualt-values";
+import { createFilter } from "../frontend/utils/product-form/create-filter";
 
 type FormValues = z.infer<typeof ProductFormSchema>;
-type ProductFormProps = {
-  product?: Product;
-  product_id?: string;
-  images?: ProductImage[];
-};
-
-const steps = [
-  {
-    id: "Step 1",
-    name: "Product Information",
-    fields: [
-      "name",
-      "code",
-      "price",
-      "description",
-      "status",
-      "is_sold",
-      "category",
-    ],
-  },
-  {
-    id: "Step 2",
-    name: "Saler Information",
-    fields: [
-      "saler_name",
-      "saler_location",
-      "saler_email",
-      "saler_phone",
-      "saler_telegram_username",
-    ],
-  },
-];
+type FieldName = keyof FormValues;
 
 const status = [
   { label: "Approved", value: "approved" },
   { label: "Pending", value: "pending" },
   { label: "Rejected", value: "rejected" },
 ] as const;
-
-type RawLocation = {
-  id: string;
-  name: string;
-  region?: string;
-};
-type LocationOption = {
-  label: string;
-  value: string;
-};
-
-type RawCategory = {
-  id: string;
-  name: string;
-  slug?: string;
-};
-
-type CategoryOption = {
-  label: string;
-  value: string;
-};
-
 export default function ProductFormMain({
   product,
   product_id,
   images,
+  categories,
+  locations,
 }: ProductFormProps) {
-  const [rawLocations, setRawLocations] = useState<RawLocation[]>([]);
-  const [rawCategory, setRawCategory] = useState<RawCategory[]>([]);
+  const form = useForm<FormValues>({
+    resolver: zodResolver(ProductFormSchema),
+    defaultValues: getDefaultValues(product),
+  });
+  // Used to manage defualt Values for update
+  let salerLocationInputValue = null;
+  let categoryInputValue = null;
+  const { categoriesOption } = useCategoryOption(categories ?? []);
+  const { locationsOption } = useLocationOption(locations ?? []);
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(1);
   const [previousStep, setPreviousStep] = useState(1);
-  const [salerLocationInputValue, setSalerLocationInputValue] = useState<string | undefined>(""); // For Update
-  const [categoryInputValue, setCategoryInputValue] = useState<
-    string | undefined
-  >("");
   const delta = currentStep - previousStep;
+  const category = categoriesOption.find(
+    (item) => item.value == product?.category,
+  );
+  categoryInputValue = category?.label;
+  const location = locationsOption.find(
+    (item) => item.value == product?.saler_location,
+  );
+  salerLocationInputValue = location?.label;
 
-  // Custom filter logic
-  // Solutions #1
-  function onCategoryFilter(optionValues: string[], inputValue: string) {
-    if (!inputValue) return optionValues;
-    const search = inputValue.toLowerCase();
-    return categories
-      .filter(
-        (item) =>
-          optionValues.includes(item.value) &&
-          item.label.toLowerCase().includes(search),
-      )
-      .map((item) => item.value);
-  }
-
-  // Solutions #2
-  const handleFilter = (options: string[], search: string) => {
+  const handleLocationFilter = (options: string[], search: string) => {
     // 1. Map the string values back to their full objects
-    const itemsToFilter = locations.filter((item) =>
+    const itemsToFilter = locationsOption.filter((item) =>
       options.includes(item.value),
     );
     // 2. Use match-sorter (or .filter) to search specifically on the 'label' key
@@ -150,103 +97,17 @@ export default function ProductFormMain({
     // 3. Return the array of values (IDs) that matched
     return filtered.map((item) => item.value);
   };
-
-  const createFilter = (data: { label: string; value: string }[]) =>
-  (options: string[], search: string) => {
-    const items = data.filter((item) =>
-      options.includes(item.value)
-    );
-
-    return matchSorter(items, search, {
-      keys: ["label"],
-    }).map((item) => item.value);
-  };
-
-
-
-  async function fetchLocationChoice() {
-    const res = await fetchLocation();
-    setRawLocations(res);
-  }
-
-  async function fetchCategoryChoice() {
-    const res = await fetchCategories();
-    setRawCategory(res);
-  }
-
-  useEffect(() => {
-    fetchLocationChoice();
-    fetchCategoryChoice();
-  }, []);
-
-  const locations: LocationOption[] = rawLocations.map((item) => ({
-    label: `${item?.name} - ${item?.region}`,
-    value: String(item?.id),
-  }));
-
-  const categories: CategoryOption[] = rawCategory.map((item) => ({
-    label: `${item?.name}`,
-    value: String(item?.id),
-  }));
-
-  const locationFilter = createFilter(locations);
-const categoryFilter = createFilter(categories);
-
-  useEffect(() => {
-    const location = locations.find(
-      (loc) => loc.value === product?.saler_location,
-    );
-    setSalerLocationInputValue(location?.label);
-  }, [product, locations]);
-
-  // Set Category
-  useEffect(() => {
-    const category = categories.find((loc) => loc.value === product?.category);
-    setCategoryInputValue(category?.label);
-  }, [product, categories]);
-
-  // Set Location
-
-  const form = useForm<FormValues>({
-    resolver: zodResolver(ProductFormSchema),
-    defaultValues: product
-      ? {
-        // Product Related
-        name: product.name,
-        description: product.description,
-        code: product.code,
-        price: product.price,
-        category: product.category,
-        // Saler Related
-        saler_name: product.saler_name,
-        saler_location: product.saler_location,
-        saler_email: product.saler_email,
-        saler_phone: product.saler_phone,
-        seller_telegram_username: product.seller_telegram_username,
-        // Aditional Info and Status
-        status: product.status,
-        is_sold: product.is_sold,
-
-      }
-      : {
-        // Product Related
-        name: "",
-        description: "",
-        code: "",
-        price: 0,
-        // Saler Related
-        saler_name: "",
-        saler_location: "",
-        saler_email: "",
-        saler_phone: "",
-        seller_telegram_username: "",
-        // Aditional Info and Status
-        status: "pending",
-        is_sold: false,
-        category: "",
-      },
-  });
-  type FieldName = keyof FormValues;
+const handleCategoriesFilter = createFilter(categoriesOption)
+  // const handleCategoriesFilter = (options: string[], search: string) => {
+  //   const itemsToFilter = categoriesOption?.filter((item) =>
+  //     options.includes(item.value),
+  //   );
+  //   const filtered = matchSorter(itemsToFilter, search, {
+  //     keys: ["label"],
+  //     threshold: matchSorter.rankings.MATCHES,
+  //   });
+  //   return filtered.map((item) => item.value);
+  // };
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
     try {
@@ -479,7 +340,6 @@ const categoryFilter = createFilter(categories);
                             </Field>
                           )}
                         />
-
                         <Controller
                           name="category"
                           control={form.control}
@@ -489,23 +349,25 @@ const categoryFilter = createFilter(categories);
                               data-invalid={fieldState.invalid}
                             >
                               <FieldContent>
-                                <FieldLabel htmlFor="category">
+                                <FieldLabel htmlFor="form-category">
                                   Category
                                 </FieldLabel>
+                                <FieldDescription>
+                                  Lorem ipsum dolor sit.
+                                </FieldDescription>
                                 {fieldState.invalid && (
                                   <FieldError errors={[fieldState.error]} />
                                 )}
                               </FieldContent>
                               <Combobox.ComboboxRoot
-                                value={field.value}
-                                onValueChange={field.onChange}
                                 defaultValue={categoryInputValue}
-                                // onFilter={handleFilter}
-                                onFilter={categoryFilter}
+                                onValueChange={field.onChange}
+                                onFilter={handleCategoriesFilter}
                               >
                                 <Combobox.ComboboxAnchor className="flex h-9 w-full items-center justify-between rounded-md border border-zinc-200 bg-white px-3 py-2 shadow-xs transition-colors data-focused:ring-1 data-focused:ring-zinc-800 dark:border-zinc-800 dark:bg-zinc-950 dark:data-focused:ring-zinc-300">
                                   <Combobox.ComboboxInput
-                                    placeholder="Search Category..."
+                                    id="form-category"
+                                    placeholder="Search Categorie..."
                                     className="flex h-9 w-full rounded-md bg-transparent text-base text-zinc-900 placeholder:text-zinc-500 focus:outline-hidden disabled:cursor-not-allowed disabled:opacity-50 md:text-sm dark:text-zinc-50 dark:placeholder:text-zinc-400"
                                   />
                                   <Combobox.ComboboxTrigger className="flex shrink-0 items-center justify-center rounded-r-md border-zinc-200 bg-transparent text-zinc-500 transition-colors hover:text-zinc-900 focus-visible:outline-hidden disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-50">
@@ -515,9 +377,9 @@ const categoryFilter = createFilter(categories);
                                 <Combobox.ComboboxPortal>
                                   <Combobox.ComboboxContent className="data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 relative z-50 min-w-[var(--dice-anchor-width)] overflow-hidden rounded-md border border-zinc-200 bg-white p-1 text-zinc-950 shadow-md data-[state=closed]:animate-out data-[state=open]:animate-in dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50">
                                     <Combobox.ComboboxEmpty className="py-6 text-center text-sm text-zinc-500 dark:text-zinc-400">
-                                      No Category found.
+                                      No tricks found.
                                     </Combobox.ComboboxEmpty>
-                                    {categories.map((item) => (
+                                    {categoriesOption.map((item) => (
                                       <Combobox.ComboboxItem
                                         key={item.value}
                                         value={item.value}
@@ -663,11 +525,9 @@ const categoryFilter = createFilter(categories);
                                 )}
                               </FieldContent>
                               <Combobox.ComboboxRoot
-                                value={field.value}
-                                onValueChange={field.onChange}
                                 defaultValue={salerLocationInputValue}
-                                // onFilter={handleFilter}
-                                onFilter={handleFilter}
+                                onValueChange={field.onChange}
+                                onFilter={handleLocationFilter}
                               >
                                 <Combobox.ComboboxAnchor className="flex h-9 w-full items-center justify-between rounded-md border border-zinc-200 bg-white px-3 py-2 shadow-xs transition-colors data-focused:ring-1 data-focused:ring-zinc-800 dark:border-zinc-800 dark:bg-zinc-950 dark:data-focused:ring-zinc-300">
                                   <Combobox.ComboboxInput
@@ -683,7 +543,7 @@ const categoryFilter = createFilter(categories);
                                     <Combobox.ComboboxEmpty className="py-6 text-center text-sm text-zinc-500 dark:text-zinc-400">
                                       No tricks found.
                                     </Combobox.ComboboxEmpty>
-                                    {locations.map((location) => (
+                                    {locationsOption.map((location) => (
                                       <Combobox.ComboboxItem
                                         key={location.value}
                                         value={location.value}

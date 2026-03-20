@@ -29,6 +29,6 @@
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
     "**/*.mts"
-  ],
+, "../ግዜያዊ ኮድ/form copy.tsx", "../ግዜያዊ ኮድ/FormInputField copy.tsx"  ],
   "exclude": ["node_modules"]
 }

@@ -1,8 +1,13 @@
 import { fetchCategories } from "@/actions/category";
+import { fetchLocation } from "@/actions/location";
 import { fetchProduct } from "@/actions/product";
 import ProductFormMain from "@/components/forms/product-form/form";
 import React from "react";
-
+type Category = {
+    id: string;
+    name: string;
+    slug: string;
+}
 export default async function ProductUpatePage({
   params,
 }: {
@@ -10,7 +15,8 @@ export default async function ProductUpatePage({
 }) {
   const productId = (await params).id;
   const data = await fetchProduct(productId);
-  const categories = await fetchCategories()
+  const categories:Category[] = await fetchCategories();
+  const locations = await fetchLocation();
   return (
     <ProductFormMain
       product={{
@@ -30,6 +36,7 @@ export default async function ProductUpatePage({
       product_id={productId}
       images = {data.images}
       categories = {categories}
+      locations={locations}
     />
   );
 }
