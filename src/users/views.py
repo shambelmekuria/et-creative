@@ -2,11 +2,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
-import logging
 
-# JWT packages for create token manualy
-from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework_simplejwt.tokens import RefreshToken
 
 # custom code
 from .models import User
@@ -21,7 +17,6 @@ from .serializers import (
 # Django Contrib for Password Reset
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from django.utils.encoding import force_bytes
-from django.core.mail import send_mail
 from django.conf import settings
 from django.contrib.auth.tokens import default_token_generator
 
