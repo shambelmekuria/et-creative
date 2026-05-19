@@ -7,12 +7,21 @@ from .serializers import (
     ProductSerializer,
     ProductImageSerializer,
 )
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated,BasePermission
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework import status
 
+class IsOwnerOrReadOnly(BasePermission):
+    def has_object_permission(self, request, view, obj):
+        # Read permissions are allowed to any request,
+        # so we'll always allow GET, HEAD or OPTIONS requests.
+        if request.method in ['GET', 'HEAD', 'OPTIONS']:
+            return True
+
+        # Write permissions are only allowed to the owner of the product.
+        return obj.owner == request.user
 
 class CategoryViewSet(ModelViewSet):
     queryset = Category.objects.all()
@@ -28,7 +37,8 @@ class LocationViewSet(ModelViewSet):
 
 class ProductViewSet(ModelViewSet):
     serializer_class = ProductSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated,IsOwnerOrReadOnly]
+
     def get_queryset(self):
         return Product.objects.filter(owner=self.request.user)
 
@@ -72,8 +82,9 @@ def dashboard(request):
 
 @api_view(["GET"])
 def index(request):
-    recent_products = Product.objects.prefetch_related(
-        "images").filter(is_sold=False, status="approved")[:6]
+    recent_products = Product.objects.prefetch_related("images").filter(
+        is_sold=False, status="approved"
+    )[:6]
     data = []
     for product in recent_products:
         first_image = product.images.filter(is_main=True).first()
@@ -100,22 +111,25 @@ def index(request):
 
 @api_view(["GET"])
 def product_list(request):
-    products = Product.objects.prefetch_related(
-        "images").filter(is_sold=False, status="approved")
+    products = Product.objects.prefetch_related("images").filter(
+        is_sold=False, status="approved"
+    )
     data = []
     for product in products:
         first_image = product.images.filter(is_main=True).first()
         data.append(
             {
+                "id": product.id,
                 "name": product.name,
                 "description": product.description,
                 "price": product.price,
+                "category": product.category.name,
                 "code": product.code,
                 "saler_name": product.saler_name,
                 "saler_phone": product.saler_phone,
                 "saler_telegram_username": product.seller_telegram_username,
                 "saler_email": product.saler_email,
-                "saler_location": f"{product.saler_location.name.upper()}-{product.saler_location.region.upper()}",
+                "saler_location": f"{product.saler_location.name.capitalize() } - { product.saler_location.region.capitalize()}",
                 "featured_image": first_image.image.url if first_image else None,
                 "images": [img.image.url for img in product.images.all()],
             }
@@ -131,9 +145,7 @@ def product_detail(request, pk):
     try:
         product = Product.objects.prefetch_related("images").get(pk=pk)
         related_products = Product.objects.filter(
-            saler_location=product.saler_location,
-            is_sold=False,
-            status="approved"
+            saler_location=product.saler_location, is_sold=False, status="approved"
         ).exclude(pk=pk)[:4]
     except Product.DoesNotExist:
         return Response(
@@ -147,6 +159,7 @@ def product_detail(request, pk):
         "description": product.description,
         "price": product.price,
         "code": product.code,
+        "category": product.category.name,
         "saler_name": product.saler_name,
         "saler_phone": product.saler_phone,
         "saler_telegram_username": product.seller_telegram_username,

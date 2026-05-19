@@ -2,6 +2,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
+import logging
 
 # JWT packages for create token manualy
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -186,22 +187,79 @@ def password_reset_confirm(request):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-@api_view(['POST'])
+# @api_view(['POST'])
+# def activate_account(request):
+#     serializer = ActivateSerializer(data=request.data)
+#     if not serializer.is_valid():
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+#     try:
+#         uid = urlsafe_base64_decode(serializer.validated_data['uid']).decode()
+#         token = serializer.validated_data["token"]
+#         user = User.objects.get(id=uid)
+#     except(User.DoesNotExist, ValueError, TypeError):
+#         return Response({'message': "Invalid activation link"}, status=status.HTTP_400_BAD_REQUEST)
+#     if user.is_active:
+#         return Response({'message': "This account has already been successfully activated"}, status=status.HTTP_400_BAD_REQUEST)
+#     if not default_token_generator.check_token(user, token):
+#         return Response({'message': "The activation link is invalid or has expired"}, status=status.HTTP_400_BAD_REQUEST)
+#     user.is_active = True
+#     user.save()
+#     return Response({'message': "Account activated successfully"}, status=status.HTTP_200_OK)
+
+
+
+@api_view(["POST"])
 def activate_account(request):
+    """
+    Activate a user account using a UID and token from the activation email.
+
+    Returns 200 on success, 400 for invalid/expired links or already-active accounts.
+    """
     serializer = ActivateSerializer(data=request.data)
     if not serializer.is_valid():
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    try:
-        uid = urlsafe_base64_decode(serializer.validated_data['uid']).decode()
-        token = serializer.validated_data["token"]
-        user = User.objects.get(id=uid)
-    except(User.DoesNotExist, ValueError, TypeError):
-        return Response({'message': "Invalid activation link"}, status=status.HTTP_400_BAD_REQUEST)
+
+    user, error_response = _resolve_user(serializer.validated_data)
+    if error_response:
+        return error_response
+
     if user.is_active:
-        return Response({'message': "This account has already been successfully activated"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            {"detail": "This account has already been activated."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    token = serializer.validated_data["token"]
     if not default_token_generator.check_token(user, token):
-        return Response({'message': "The activation link is invalid or has expired"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            {"detail": "The activation link is invalid or has expired."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
     user.is_active = True
-    user.save()
-    return Response({'message': "Account activated successfully"}, status=status.HTTP_200_OK)
+    user.save(update_fields=["is_active"])
+    print("Account activated for user_id=%s", user.pk)
+
+    return Response(
+        {"detail": "Your account has been successfully activated."},
+        status=status.HTTP_200_OK,
+    )
+
+
+def _resolve_user(validated_data):
+    """
+    Decode the UID and fetch the corresponding User.
+
+    Returns a (user, None) tuple on success, or (None, Response) on failure.
+    """
+    try:
+        uid = urlsafe_base64_decode(validated_data["uid"]).decode()
+        user = User.objects.get(pk=uid)
+        return user, None
+    except (User.DoesNotExist, ValueError, TypeError, UnicodeDecodeError):
+        print("Invalid activation attempt with uid=%s", validated_data.get("uid"))
+        return None, Response(
+            {"detail": "Invalid activation link."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
     

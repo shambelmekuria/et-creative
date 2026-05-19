@@ -3,36 +3,33 @@ import React from "react";
 import { Button } from "../ui/button";
 import {
   Card,
-  CardAction,
   CardContent,
-  CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import Image from "next/image";
 import { Map, MapPin } from "lucide-react";
-import { apidata } from "./apidata";
 import { tabList } from "./tab";
 import { Badge } from "../ui/badge";
+import { DJANGO_BASE_URL } from "@/config/defualt";
+import Link from "next/link";
 type Product = {
-  id: number;
   name: string;
   description: string;
   category: string;
   price: number;
+  featured_image: string;
+  saler_location: string;
 };
 
 
-export default function ProductList() {
+export default function ProductList({productList}: {productList: Product[]}) {
   const [active, setActive] = React.useState(1);
-  const [data, setData] = React.useState<Product[]>(apidata);
+  const [data, setData] = React.useState<Product[]>(productList);
 
-  React.useEffect(() => {
-    console.log("Updated data:", data);
-  }, [data]);
+
   return (
-    <div className="my-8 px-4">
+    <div className="my-12 px-4 md:px-8">
       <div className="flex gap-2 flex-wrap items-center">
         {tabList.map((btn, index) => (
           <Button
@@ -42,8 +39,8 @@ export default function ProductList() {
               setActive(index + 1);
               setData(
                  btn.category === "all"
-                  ? apidata
-                  : apidata.filter((item) => item.category === btn.category),
+                  ? productList
+                  : productList.filter((item) => item.category === btn.category),
               );
             }}
             key={index}
@@ -52,12 +49,16 @@ export default function ProductList() {
           </Button>
         ))}
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-3 xl:grid-cols-4 gap-8 my-8 ">
+      <div className="grid grid-cols-1 sm:grid-cols-3 my-16 gap-6">
         {
-        data.length === 0 ?<p className="text-muted-foreground">No Product Founds</p>:data.map((product: any) => (
-          <Card key={product.id} className="gap-1 py-0 rounded-md overflow-hidden">
+        data.length === 0 ?<p className="text-muted-foreground">No Product Founds</p>:data.map((product: any,index) => (
+         <Link href={`/product/${product.id}`} key={index}>
+           <Card className="gap-1 py-0 rounded-md overflow-hidden">
             <div className="relative aspect-square w-full ">
-              <Image src="/image/img-2.jpg" alt={product.name} fill />
+              <Image src={
+                product.featured_image  ? `${DJANGO_BASE_URL}${product.featured_image}`
+                : "/images/placeholder.jpg"
+              } alt={product.name} fill />
             </div>
             <CardHeader className="py-0 px-4">
               <CardTitle className="text-lg font-bold text-neutral-700 dark:text-neutral-100">
@@ -69,9 +70,9 @@ export default function ProductList() {
                 {product.price.toFixed(2)} ብር
               </p>
               <div className="flex items-center justify-between">
-                <p className="flex gap-2 items-center text-muted-foreground text-xs">
+                <p className="flex gap-2 items-center text-muted-foreground text-xs ">
                 <MapPin className="inline-block  text-muted-foreground h-3 w-3" />
-                Addis Ababa
+               {product.saler_location}
               </p>
               <Badge variant="secondary" className="h-6 px-2 rounded capitalize">
                 {product.category}
@@ -79,6 +80,7 @@ export default function ProductList() {
               </div>
             </CardContent>
           </Card>
+         </Link>
         ))}
       </div>
     </div>

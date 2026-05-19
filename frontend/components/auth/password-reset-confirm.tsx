@@ -41,7 +41,6 @@ export default function PasswordResetConfirm({
   token,
 }: PasswordResetConfirmProps) {
   const [sent, setSent] = useState(false);
-  const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const router = useRouter()
   const form = useForm<passwordResetRequestValue>({
